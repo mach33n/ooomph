@@ -13,7 +13,7 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
         const driversdb = db.collection('drivers');
         server.post('/ride', (req, res) => {
             driversdb.insertOne({
-                title: 'Post One',
+                title: 'Post two',
                 body: 'Body of post one',
                 category: 'News',
                 tags: ['news', 'events']
