@@ -6,68 +6,83 @@
  * @flow strict-local
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
+  Alert,
   SafeAreaView,
   StyleSheet,
-  ScrollView,
   View,
   Text,
   StatusBar,
-  Slider
+  Slider,
+  Button,
+  Picker
 } from 'react-native';
-
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 import 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { TextInput } from 'react-native-gesture-handler';
+import Main from './Main.js';
+ 
+function EntryPage({ navigation }) {
+  const [name, setName] = useState('');
+  const [licensePlate, setLicensePlate] = useState('');
+  const [capacity, setCapacity] = useState(1);
 
-class EntryPage extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      name: '',
-      licensePlate: '',
-      capacity: 1
+  const onSubmit = () => {
+    if (name != '' && licensePlate != '') {
+      navigation.navigate('Main', {
+        name: name,
+        licensePlate: licensePlate,
+        capacity: capacity
+      })
+    } else {
+      Alert.alert(
+        "Please fill in both fields!",
+        "",
+        [
+          { text: "OK", onPress: () => console.log("OK Pressed") }
+        ],
+        { cancelable: false }
+      );
     }
   }
 
-  render() {
-    return (
-      <View style={styles.container} backgroundColor='green'>
-         <Text style={styles.formLabel}> Driver Form </Text>
-          <View>
-            <TextInput 
-              placeholder="name" 
-              style={styles.inputStyle}/>
-            <TextInput
-              secureTextEntry={true}
-              placeholder="license plate"
-              style={styles.inputStyle}
-            />
-            <Text style={styles.formText}> Driving Capacity </Text>
-            <Slider
-              step={1}
-              minimumValue={1}
-              maximumValue={6}
-              value={this.state.capacity}
-              onValueChange={val => this.setState({ capacity: val })}
-              minimumTrackTintColor="#1fb28a"
-              maximumTrackTintColor="#d3d3d3"
-              thumbTintColor="#b9e4c9"
-            />
-            <Text style={{textAlign: 'center'}}>{this.state.capacity} passenger</Text>
-          </View>
-      </View>
-    )
-  }
+  return (
+    <View style={styles.container} backgroundColor='green'>
+        <Text style={styles.formLabel}> Driver Form </Text>
+        <View>
+          <TextInput 
+            onChangeText={(val) => {setName(val)}}
+            placeholder="name" 
+            style={styles.inputStyle}/>
+          <TextInput
+            onChangeText={(val) => setLicensePlate(val)}
+            secureTextEntry={true}
+            placeholder="license plate"
+            style={styles.inputStyle}
+          />
+          <Text style={styles.formText}> Driving Capacity </Text>
+          <Slider
+            step={1}
+            minimumValue={1}
+            maximumValue={6}
+            value={capacity}
+            onValueChange={(val) => setCapacity(val)}
+            minimumTrackTintColor="#1fb28a"
+            maximumTrackTintColor="#d3d3d3"
+            thumbTintColor="#b9e4c9"
+          />
+          <Text style={{textAlign: 'center'}}>{capacity} passenger</Text>
+        </View>
+        <Button
+          onPress={onSubmit}
+          title="Submit"
+          color="blue"
+          accessibilityLabel="Submit"
+        />
+    </View>
+  )
 }
 
 const Stack = createStackNavigator();
@@ -80,7 +95,9 @@ class App extends React.Component {
       return (
         <NavigationContainer>
           <Stack.Navigator>
+          <Stack.Screen name="Main" component={Main} />
             <Stack.Screen name="Entry" component={EntryPage} />
+            
           </Stack.Navigator>
         </NavigationContainer>
       );
