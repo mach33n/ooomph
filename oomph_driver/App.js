@@ -9,32 +9,39 @@
 import React, { useState } from 'react';
 import {
   Alert,
-  SafeAreaView,
   StyleSheet,
   View,
   Text,
-  StatusBar,
   Slider,
   Button,
-  Picker
 } from 'react-native';
 import 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { TextInput } from 'react-native-gesture-handler';
 import Main from './Main.js';
+import axios from 'axios';
+
+// Android has to use this url to access localhost on machine
+axios.defaults.baseURL='http://10.0.2.2:3000'
  
 function EntryPage({ navigation }) {
   const [name, setName] = useState('');
   const [licensePlate, setLicensePlate] = useState('');
   const [capacity, setCapacity] = useState(1);
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     if (name != '' && licensePlate != '') {
-      navigation.navigate('Main', {
+      await axios.post('/newdriver', {
         name: name,
         licensePlate: licensePlate,
         capacity: capacity
+      }).then(res => {
+        navigation.navigate('Main', {
+          name: name
+        })
+      }).catch(err => {
+        console.log(err.message);
       })
     } else {
       Alert.alert(
@@ -95,9 +102,8 @@ class App extends React.Component {
       return (
         <NavigationContainer>
           <Stack.Navigator>
+          <Stack.Screen name="Entry" component={EntryPage} />
           <Stack.Screen name="Main" component={Main} />
-            <Stack.Screen name="Entry" component={EntryPage} />
-            
           </Stack.Navigator>
         </NavigationContainer>
       );

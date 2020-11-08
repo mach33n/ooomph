@@ -1,11 +1,14 @@
-import React, {FC, useState, useEffect} from 'react';
+import React from 'react';
 import {Alert, SafeAreaView, View, Text, TouchableHighlight, Modal, StyleSheet} from 'react-native';
 import MapboxGL from '@react-native-mapbox-gl/maps';
-import { block } from 'react-native-reanimated';
+import axios from 'axios';
 
+// Initialize some Mapbox credentials
+// See https://github.com/react-native-mapbox-gl/maps
 MapboxGL.setAccessToken("pk.eyJ1Ijoic21hY2tjYW0iLCJhIjoiY2p3NWx0Z3ZoMXVldjQ4cXF6MWZrMGZ5NyJ9.EgCkRVGAAUDmUVYR-JSfeg");
 MapboxGL.setConnected(true);
 
+// Todo: Add CSS file and input styles
 const styles = StyleSheet.create({
   centeredView: {
     flex: 1,
@@ -45,24 +48,54 @@ const styles = StyleSheet.create({
   }
 });
 
+// This is the main screen for driver map and navigation.
 class Main extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            styleURL: MapboxGL.StyleURL['Dark'],
-            rideAlert: true
+            rideAlert: false,
+            isGranted: false
         }
     }
 
     async componentDidMount() {
         const isGranted = await MapboxGL.requestAndroidLocationPermissions();
-        MapboxGL.locationManager.start();
+        this.setState({ isGranted: isGranted });
+        if (isGranted) {
+          MapboxGL.locationManager.start();
+          console.log(this.props.route.params.name);
+        }   
     }
+
+    onUpdate = async (location) => {
+      axios.post('/coordUpd', {
+        name: this.props.route.params.name,
+        lat: location.coords.latitude,
+        long: location.coords.longitude
+      }).then(res => {
+        console.log(res);
+      }).catch(err => {
+        console.log(err.message);
+      })
+    }
+
     render() {
         return (
             <SafeAreaView
             style={[{flex: 1}, {backgroundColor: "blue"}]}
             forceInset={{top: 'always'}}>
+                <Modal
+                  animationType="slide"
+                  transparent={true}
+                  visible={!this.state.isGranted}
+                >
+                  <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                      <Text style={styles.modalText}>Unable to load map, please enable location permissions in phone.</Text>
+                    </View>
+                  </View>
+                </Modal>
+
                 <Modal
                   animationType="slide"
                   transparent={true}
@@ -91,8 +124,10 @@ class Main extends React.Component {
                     </View>
                   </View>
                 </Modal>
-              <MapboxGL.MapView styleURL={this.state.styleURL.styleURL} style={{flex: 1}}>
-              <MapboxGL.Camera followZoomLevel={12} followUserLocation />
+              
+              <MapboxGL.MapView styleURL={MapboxGL.StyleURL['Dark'].styleURL} style={{flex: 1}}>
+                <MapboxGL.Camera followZoomLevel={12} followUserLocation />
+                <MapboxGL.UserLocation minDisplacement={10} onUpdate={this.onUpdate}/>
               </MapboxGL.MapView>
             </SafeAreaView>
           );

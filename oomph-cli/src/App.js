@@ -1,21 +1,23 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 import mapboxgl from 'mapbox-gl';
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import Button from 'react-bootstrap/Button';
+import axios from 'axios';
 
 mapboxgl.accessToken = 'pk.eyJ1Ijoic21hY2tjYW0iLCJhIjoiY2p3NWx0Z3ZoMXVldjQ4cXF6MWZrMGZ5NyJ9.EgCkRVGAAUDmUVYR-JSfeg';
-
+axios.defaults.baseURL = "http://localhost:3000"
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      selected: false
+      selected: false,
+      notifDriv: false
     };
   }
+
   componentDidMount() {
     // get current location using javascript
     navigator.geolocation.getCurrentPosition(position => {
@@ -25,7 +27,6 @@ class App extends React.Component {
         center: [position.coords.longitude, position.coords.latitude],
         zoom: 10
       });
-
 
       // add marker to current location
       var marker = new mapboxgl.Marker()
@@ -74,7 +75,16 @@ class App extends React.Component {
   }
 
   handleRideConf = () => {
-    console.log('Register Ride');
+    navigator.geolocation.getCurrentPosition(position => {
+       axios.post('/getDriver', {
+         lat: position.coords.latitude,
+         long: position.coords.longitude
+       }).then(res => {
+         console.log(res);
+       }).catch(err => {
+         console.log(err);
+       })
+    })
   }
 
   render() {
