@@ -5,6 +5,7 @@ import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import Button from 'react-bootstrap/Button';
 import axios from 'axios';
+import socketIO from 'socket.io-client';
 
 mapboxgl.accessToken = 'pk.eyJ1Ijoic21hY2tjYW0iLCJhIjoiY2p3NWx0Z3ZoMXVldjQ4cXF6MWZrMGZ5NyJ9.EgCkRVGAAUDmUVYR-JSfeg';
 axios.defaults.baseURL = "http://localhost:3000"
@@ -79,8 +80,8 @@ class App extends React.Component {
        axios.post('/getDriver', {
          lat: position.coords.latitude,
          long: position.coords.longitude
-       }).then(res => {
-         console.log(res);
+       }).then(ret => {
+         console.log(ret)
        }).catch(err => {
          console.log(err);
        })
