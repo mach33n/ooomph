@@ -41,14 +41,14 @@
   <p align="center">
     A lovely alternative to GT stingerettes and Ubers. Also just practice in making rideshare apps.
     <br />
-    <a href="https://github.com/github_username/repo_name"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/mach33n/ooomph"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/github_username/repo_name">View Demo</a>
+    <a href="https://github.com/mach33n/ooomph">View Demo</a>
     ·
-    <a href="https://github.com/github_username/repo_name/issues">Report Bug</a>
+    <a href="https://github.com/mach33n/ooomph/issues">Report Bug</a>
     ·
-    <a href="https://github.com/github_username/repo_name/issues">Request Feature</a>
+    <a href="https://github.com/mach33n/ooomph/issues">Request Feature</a>
   </p>
 </p>
 
