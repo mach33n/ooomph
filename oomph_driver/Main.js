@@ -9,7 +9,6 @@ import {
   StyleSheet,
 } from 'react-native';
 import MapboxGL from '@react-native-mapbox-gl/maps';
-import axios from 'axios';
 
 // Initialize some Mapbox credentials
 // See https://github.com/react-native-mapbox-gl/maps

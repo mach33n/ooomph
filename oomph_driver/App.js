@@ -25,6 +25,10 @@ function EntryPage({navigation}) {
 
   const onSubmit = async () => {
     if (name != '' && licensePlate != '') {
+      // Simple Async storage but with security options
+      var Datastore = require('react-native-local-mongodb'), 
+      db = new Datastore({ filename: 'accountStore', autoload: true });
+      db.insert([{ 'name': name, 'licensePlate': licensePlate, 'capacity': capacity }])
       await axios
         .post('/newdriver', {
           name: name,
@@ -51,33 +55,39 @@ function EntryPage({navigation}) {
 
   return (
     <View style={styles.container} backgroundColor="green">
-      <Text style={styles.formLabel}> Driver Form </Text>
       <View>
-        <TextInput
-          onChangeText={(val) => {
-            setName(val);
-          }}
-          placeholder="name"
-          style={styles.inputStyle}
-        />
-        <TextInput
-          onChangeText={(val) => setLicensePlate(val)}
-          secureTextEntry={true}
-          placeholder="license plate"
-          style={styles.inputStyle}
-        />
-        <Text style={styles.formText}> Driving Capacity </Text>
-        <Slider
-          step={1}
-          minimumValue={1}
-          maximumValue={6}
-          value={capacity}
-          onValueChange={(val) => setCapacity(val)}
-          minimumTrackTintColor="#1fb28a"
-          maximumTrackTintColor="#d3d3d3"
-          thumbTintColor="#b9e4c9"
-        />
-        <Text style={{textAlign: 'center'}}>{capacity} passenger</Text>
+      <View style={styles.container2} backgroundColor="green">
+      <View style={styles.container2} backgroundColor="green">
+        <Text style={styles.formLabel}> Driver Form </Text>
+          <View style={styles.container2} backgroundColor="green">
+            <TextInput
+              onChangeText={(val) => {
+                setName(val);
+              }}
+              placeholder="name"
+              style={styles.inputStyle}
+            />
+            <TextInput
+              onChangeText={(val) => setLicensePlate(val)}
+              secureTextEntry={true}
+              placeholder="license plate"
+              style={styles.inputStyle}
+            />
+          </View>
+        </View>
+          <Text style={styles.formText}> Driving Capacity </Text>
+          <Slider
+            step={1}
+            minimumValue={1}
+            maximumValue={6}
+            value={capacity}
+            onValueChange={(val) => setCapacity(val)}
+            minimumTrackTintColor="#1fb28a"
+            maximumTrackTintColor="#d3d3d3"
+            thumbTintColor="#b9e4c9"
+          />
+          <Text style={{textAlign: 'center'}}>{capacity} passenger</Text>
+        </View>
       </View>
       <Button
         onPress={onSubmit}
@@ -99,7 +109,7 @@ class App extends React.Component {
     return (
       <NavigationContainer>
         <Stack.Navigator>
-        <Stack.Screen name="Entry" component={EntryPage} />
+        <Stack.Screen name="Sign In" component={EntryPage} />
         <Stack.Screen name="Main" component={Main} />
         </Stack.Navigator>
       </NavigationContainer>
@@ -114,10 +124,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     height: 50,
+    paddingBottom: 20
   },
-
+  container2: {
+    paddingBottom:20
+  },
   formLabel: {
-    fontSize: 20,
+    fontSize: 50,
     color: '#fff',
   },
   inputStyle: {
@@ -125,7 +138,7 @@ const styles = StyleSheet.create({
     width: 300,
     height: 40,
     paddingHorizontal: 10,
-    borderRadius: 50,
+    borderWidth: 1,
     backgroundColor: '#DCDCDC',
   },
   formText: {

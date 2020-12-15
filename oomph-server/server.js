@@ -4,7 +4,7 @@ const app = express();
 const cors = require('cors');
 const port = 3000;
 
-const client = require('mongodb').MongoClient
+const client = require('mongodb').MongoClient;
 
 const server = require('http').createServer(app);
 var WebSocketServer = require('websocket').server;
@@ -14,7 +14,7 @@ app.use(cors());
 
 // instantiate a connection to our new driver through application
 var wss = new WebSocketServer({httpServer: server})
-var storedSockets = {}
+var storedSockets = {};
 
 // Kinda ugly but just encompasses all mongodb client stuff
 client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/oomph?retryWrites=true&w=majority', {
@@ -25,10 +25,11 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
 
         // Handles updating driver location and ensuring driver is in app to recieve notifs
         wss.on('request',(request) => {
-            console.log('Connection')
             var connection = request.accept(null, request.origin);
             var name;
             //storedSockets[connection.remoteAddress] = connection
+
+            // updates location of driver using websocket
             connection.on('message', (req) => {
                 var data = JSON.parse(req.utf8Data)
                 if (data.type == "locUpdate") {
@@ -41,6 +42,8 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                     })
                 }
             })
+
+            // Currently just setting drivers as inactive when they're not on app
             connection.on('close', () => {
                 driversdb.updateOne({ name: name }, { $set: {
                     active: false
@@ -50,6 +53,7 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
             })
         })
 
+        // Endpoint for signing up a new driver
         app.post('/newdriver', (req, res) => {
             driversdb.insertOne({
                 name: req.body.name,
@@ -57,16 +61,16 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                 capacity: req.body.capacity,
                 active: true
               }).then(() => {
-                console.log('Requested')
                 res.send('New Driver made');
             }).catch(err => {
                 console.log(err)
             })
         })
 
+        // Endpoint for requesting nearest driver for request
         app.post('/getDriver', (req,res) => {
             driversdb.createIndex({location:"2dsphere"});
-            var ret = driversdb.findOne({ active: {$eq: true}}, {
+            driversdb.findOne({ active: {$eq: true}}, {
                 "location": {
                     $near: {
                         $geometry:
@@ -74,10 +78,12 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                             { type: "Point", coordinates: [req.body.long, req.body.lat] }
                     }
                 }
-            }
-            ).then(item => {
+            }).then(item => {
+                console.log(item)
                 if (item) {
-                    res.send(item)
+                    res.send(JSON.stringify(item))
+                } else {
+                    res.send('no')
                 }
             })
         })
