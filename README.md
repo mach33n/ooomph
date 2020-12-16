@@ -89,9 +89,9 @@
 
 ### Built With
 
-* React JS()
-* React Native()
-* ExpressJS ()
+* React JS
+* React Native
+* ExpressJS
 
 
 
