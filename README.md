@@ -87,16 +87,11 @@
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
 
-Here's a blank template to get started:
-**To avoid retyping too much info. Do a search and replace with your text editor for the following:**
-`github_username`, `repo_name`, `twitter_handle`, `email`, `project_title`, `project_description`
-
-
 ### Built With
 
-* []()
-* []()
-* []()
+* React JS()
+* React Native()
+* ExpressJS ()
 
 
 
@@ -107,39 +102,44 @@ To get a local copy up and running follow these simple steps.
 
 ### Prerequisites
 
-Package.json files are all included so just make sure to npm install and you should have the latest version.
-* npm
-  ```sh
-  npm install 
-  ```
+* Currently the react native code only works with Android Studio so please install that.
+* MongoDB Compass helps visualizing the backend cluster so I'd recommend that as well.
 
 ### Installation
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/github_username/repo_name.git
+   git clone https://github.com/mach33n/ooomph.git
    ```
-2. Install NPM packages
+2. Package.json files are all included so just make sure to npm install within each directory and you should have the latest version.
    ```sh
    npm install
    ```
 
-
-
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+* Before you can start using or developing with this, start up the express server by changing to the server directory and running
+```sh
+   npm run dev
+```
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+* After that, you can run the client by changing to the client directory and running the same command
+```sh
+   npm run dev
+```
 
-
+*  Finally, run the driver side app by changing to the driver directory and running
+```sh
+   react-native run-android
+```
 
 <!-- ROADMAP -->
 ## Roadmap
 
 See the [open issues](https://github.com/github_username/repo_name/issues) for a list of proposed features (and known issues).
 
+I'm currently working on adding all current issues and refactoring so hit me up for updates!
 
 
 <!-- CONTRIBUTING -->
@@ -165,9 +165,9 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email
+Your Name - [@cam71142355](https://twitter.com/cam71142355)
 
-Project Link: [https://github.com/github_username/repo_name](https://github.com/github_username/repo_name)
+Project Link: [https://github.com/mach33n/ooomph](https://github.com/mach33n/ooomph)
 
 
 
