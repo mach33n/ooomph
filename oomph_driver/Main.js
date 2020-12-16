@@ -17,7 +17,6 @@ MapboxGL.setAccessToken(
 );
 MapboxGL.setConnected(true);
 
-// Todo: Add CSS file and input styles
 const styles = StyleSheet.create({
   centeredView: {
     flex: 1,
@@ -61,6 +60,9 @@ const styles = StyleSheet.create({
 const socket = new WebSocket('ws://10.0.2.2:3000');
 socket.onopen = () => {
   console.log('connected to socket')
+}
+socket.onmessage = () => {
+  console.log('got message')
 }
 
 // This is the main screen for driver map and navigation.
@@ -109,7 +111,6 @@ class Main extends React.Component {
             </View>
           </View>
         </Modal>
-
         <Modal
           animationType="slide"
           transparent={true}
@@ -149,7 +150,6 @@ class Main extends React.Component {
             </View>
           </View>
         </Modal>
-
         <MapboxGL.MapView
           styleURL={MapboxGL.StyleURL.Dark.styleURL}
           style={{flex: 1}}>

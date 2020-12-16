@@ -2,6 +2,7 @@ const express = require('express');
 const bodyparse = require('body-parser');
 const app = express();
 const cors = require('cors');
+const e = require('express');
 const port = 3000;
 
 const client = require('mongodb').MongoClient;
@@ -43,6 +44,29 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                 }
             })
 
+            // Endpoint for requesting nearest driver for request
+            app.post('/getDriver', (req,res) => {
+                driversdb.createIndex({location:"2dsphere"});
+                driversdb.findOne({ active: {$eq: true}}, {
+                    "location": {
+                        $near: {
+                            $geometry:
+                                // For some reason you gotta set coordinates [lat, lng]
+                                { type: "Point", coordinates: [req.body.long, req.body.lat] }
+                        }
+                    }
+                }).then(item => {
+                    console.log(item)
+                    if (item) {
+                        var msg = {type:'alert'}
+                        connection.send(msg)
+                        res.send(JSON.stringify(item))
+                    } else {
+                        res.send('no')
+                    }
+                })
+            })
+
             // Currently just setting drivers as inactive when they're not on app
             connection.on('close', () => {
                 driversdb.updateOne({ name: name }, { $set: {
@@ -64,27 +88,6 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                 res.send('New Driver made');
             }).catch(err => {
                 console.log(err)
-            })
-        })
-
-        // Endpoint for requesting nearest driver for request
-        app.post('/getDriver', (req,res) => {
-            driversdb.createIndex({location:"2dsphere"});
-            driversdb.findOne({ active: {$eq: true}}, {
-                "location": {
-                    $near: {
-                        $geometry:
-                            // For some reason you gotta set coordinates [lat, lng]
-                            { type: "Point", coordinates: [req.body.long, req.body.lat] }
-                    }
-                }
-            }).then(item => {
-                console.log(item)
-                if (item) {
-                    res.send(JSON.stringify(item))
-                } else {
-                    res.send('no')
-                }
             })
         })
         

@@ -18,6 +18,9 @@ import axios from 'axios';
 // Android has to use this url to access localhost on machine
 axios.defaults.baseURL = 'http://10.0.2.2:3000';
 
+var Datastore = require('react-native-local-mongodb')
+db = new Datastore({ filename: 'accountStore', autoload: true });
+
 function EntryPage({navigation}) {
   const [name, setName] = useState('');
   const [licensePlate, setLicensePlate] = useState('');
@@ -26,8 +29,6 @@ function EntryPage({navigation}) {
   const onSubmit = async () => {
     if (name != '' && licensePlate != '') {
       // Simple Async storage but with security options
-      var Datastore = require('react-native-local-mongodb'), 
-      db = new Datastore({ filename: 'accountStore', autoload: true });
       db.insert([{ 'name': name, 'licensePlate': licensePlate, 'capacity': capacity }])
       await axios
         .post('/newdriver', {
@@ -99,6 +100,8 @@ function EntryPage({navigation}) {
   );
 }
 
+// Using react-navigation to navigate from the little form page to the main page.
+// The overarching widget is the app which encompasses both pages.
 const Stack = createStackNavigator();
 class App extends React.Component {
   constructor(props) {

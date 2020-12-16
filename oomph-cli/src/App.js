@@ -30,6 +30,7 @@ class App extends React.Component {
       const map = new mapboxgl.Map({
         container: this.mapContainer,
         style: 'mapbox://styles/mapbox/streets-v11',
+        // Bounds of gt campus
         bounds: [-84.419267,33.768374,-84.378433,33.785086],
         zoom: 10
       });
@@ -110,15 +111,15 @@ class App extends React.Component {
               'line-width': 8
               }
               });
-              // gotta get mapbox directions imported ?
             this.setState({selected:true});
         });
       })
   }
 
+  // This is meant to check if the user is within campus bounds and then if they are, request a driver.
   handleRideConf = () => {
     navigator.geolocation.getCurrentPosition(position => {
-      var bb = [-84.419267,33.768374,-84.378433,33.785086]
+      var bb = [33.76,-84.41,33.78,-84.37]
       var p = position.coords
       if ( bb[0] <= p.latitude && p.latitude <= bb[2] && bb[1] <= p.longitude && p.longitude <= bb[3]) {
         axios.post('/getDriver', {
