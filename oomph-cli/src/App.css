@@ -46,16 +46,17 @@
   }
 
 #confirm {
+  FONT-WEIGHT: 100;
   background-color: transparent;
   position: absolute;
   z-index: 1;
-  bottom: 00px;
+  bottom: 10px;
   right: 00px;
-  height: 20%;
-  width: 100%;
+  height: 15%;
+  width: 50%;
   font-family: 'Open Sans', sans-serif;
   font-size: xx-large;
-  }
+}
    
   #confirm a {
   font-size: 13px;
@@ -122,4 +123,12 @@
     padding: 0.5rem 1rem;
     font-size: 0.8rem;
     line-height: 1;
+  }
+
+  .user {
+    background-image: url('./assets/user_spot.png');
+    background-size: cover;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
   }
