@@ -41,12 +41,6 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                     console.log(data.id)
                     console.log(Object.keys(storedSockets))
 
-                    driversdb.updateOne({ _id: ObjectID(storedConnections[connection]) }, { $set: {
-                        "active": true
-                    }}).catch(err => {
-                        console.log(err);
-                    })
-
                     console.log(data.id)
                     console.log(Object.keys(storedSockets))
                 }
