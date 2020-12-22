@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   Alert,
   SafeAreaView,
@@ -16,6 +16,137 @@ MapboxGL.setAccessToken(
   'pk.eyJ1Ijoic21hY2tjYW0iLCJhIjoiY2p3NWx0Z3ZoMXVldjQ4cXF6MWZrMGZ5NyJ9.EgCkRVGAAUDmUVYR-JSfeg',
 );
 MapboxGL.setConnected(true);
+
+// Initialize an internal store for Authentication
+// See 
+var Datastore = require('react-native-local-mongodb')
+db = new Datastore({ filename: 'accountStore', autoload: true });
+
+// This is the main screen for driver map and navigation.
+function Main ({ navigation }) {
+
+  const [rideAlert, setRideAlert] = useState(false);
+  const [isGranted, setIsGranted] = useState(true);
+  const [id, setId] = useState('');
+  const [name, setName] = useState('');
+
+  const socket = new WebSocket('ws://10.0.2.2:3000');
+
+  const init = async () => {
+    const isGranted = await MapboxGL.requestAndroidLocationPermissions();
+    setIsGranted(isGranted);
+
+    if (isGranted) {
+      MapboxGL.locationManager.start();
+    }
+    
+    socket.onopen = () => {
+      console.log('connected to socket')
+      // This will send the driver ID so the server can match up
+      // the driver and their websocket connection. See server.js line 37
+      db.find({}, (err, docs) => {
+        var msg = {
+          type: 'intro',
+          id: docs[0].id
+        };
+        
+        socket.send(JSON.stringify(msg))
+      })
+    }
+
+    socket.onmessage = (res) => {
+      setRideAlert(true);
+    }
+
+    db.find({}, async (err, docs) => {
+      if (docs != undefined && docs.length >= 1 && !err) {
+        setName(docs[0].name)
+        setId(docs[0].id)
+      }
+    })
+  }
+  init();
+
+  const onUpdate = (location) => {
+    if (socket.readyState == WebSocket.OPEN) {
+      var msg = {
+        type: 'locUpdate',
+        name: name,
+        lat: location.coords.latitude,
+        long: location.coords.longitude,
+        active: true
+      };
+      socket.send(JSON.stringify(msg));
+    }
+  };
+
+    return (
+      <SafeAreaView
+        style={[{flex: 1}, {backgroundColor: 'blue'}]}
+        forceInset={{top: 'always'}}>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={!isGranted}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>
+                Unable to load map, please enable location permissions in phone.
+              </Text>
+            </View>
+          </View>
+        </Modal>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={rideAlert}
+          onRequestClose={() => {
+            Alert.alert('Modal has been closed.');
+          }}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>
+                Rider within X distance. Want to pickup?
+              </Text>
+              <View style={{flexDirection: 'row'}}>
+                <TouchableHighlight
+                  style={{
+                    ...styles.openButton,
+                    backgroundColor: '#2196F3',
+                    margin: 10,
+                  }}
+                  onPress={() => {
+                    setRideAlert(!rideAlert)
+                  }}>
+                  <Text style={styles.textStyle}>Yes I do</Text>
+                </TouchableHighlight>
+                <TouchableHighlight
+                  style={{
+                    ...styles.openButton,
+                    backgroundColor: '#2196F3',
+                    margin: 10,
+                  }}
+                  onPress={() => {
+                    setRideAlert(!rideAlert)
+                  }}>
+                  <Text style={styles.textStyle}>No Thanks</Text>
+                </TouchableHighlight>
+              </View>
+            </View>
+          </View>
+        </Modal>
+        <MapboxGL.MapView
+          styleURL={MapboxGL.StyleURL.Dark.styleURL}
+          style={{flex: 1}}>
+          <MapboxGL.Camera followZoomLevel={12} followUserLocation />
+          <MapboxGL.UserLocation
+            minDisplacement={30}
+            onUpdate={onUpdate}
+          />
+        </MapboxGL.MapView>
+      </SafeAreaView>
+    );
+}
 
 const styles = StyleSheet.create({
   centeredView: {
@@ -55,113 +186,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-
-// Fuckkkkkkk Socket.io we usin this shit
-const socket = new WebSocket('ws://10.0.2.2:3000');
-socket.onopen = () => {
-  console.log('connected to socket')
-}
-socket.onmessage = () => {
-  console.log('got message')
-}
-
-// This is the main screen for driver map and navigation.
-class Main extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      rideAlert: false,
-      isGranted: false
-    };
-  }
-
-  async componentDidMount() {
-    const isGranted = await MapboxGL.requestAndroidLocationPermissions();
-    this.setState({isGranted: isGranted});
-    if (isGranted) {
-      MapboxGL.locationManager.start();
-    }
-  }
-
-  onUpdate = (location) => {
-    var msg = {
-      type: 'locUpdate',
-      name: this.props.route.params.name,
-      lat: location.coords.latitude,
-      long: location.coords.longitude,
-      active: true
-    };
-    socket.send(JSON.stringify(msg));
-  };
-
-  render() {
-    return (
-      <SafeAreaView
-        style={[{flex: 1}, {backgroundColor: 'blue'}]}
-        forceInset={{top: 'always'}}>
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={!this.state.isGranted}>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <Text style={styles.modalText}>
-                Unable to load map, please enable location permissions in phone.
-              </Text>
-            </View>
-          </View>
-        </Modal>
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={this.state.rideAlert}
-          onRequestClose={() => {
-            Alert.alert('Modal has been closed.');
-          }}>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <Text style={styles.modalText}>
-                Rider within X distance. Want to pickup?
-              </Text>
-              <View style={{flexDirection: 'row'}}>
-                <TouchableHighlight
-                  style={{
-                    ...styles.openButton,
-                    backgroundColor: '#2196F3',
-                    margin: 10,
-                  }}
-                  onPress={() => {
-                    this.setState({rideAlert: !this.state.rideAlert});
-                  }}>
-                  <Text style={styles.textStyle}>Yes I do</Text>
-                </TouchableHighlight>
-                <TouchableHighlight
-                  style={{
-                    ...styles.openButton,
-                    backgroundColor: '#2196F3',
-                    margin: 10,
-                  }}
-                  onPress={() => {
-                    this.setState({rideAlert: !this.state.rideAlert});
-                  }}>
-                  <Text style={styles.textStyle}>No Thanks</Text>
-                </TouchableHighlight>
-              </View>
-            </View>
-          </View>
-        </Modal>
-        <MapboxGL.MapView
-          styleURL={MapboxGL.StyleURL.Dark.styleURL}
-          style={{flex: 1}}>
-          <MapboxGL.Camera followZoomLevel={12} followUserLocation />
-          <MapboxGL.UserLocation
-            minDisplacement={30}
-            onUpdate={this.onUpdate}
-          />
-        </MapboxGL.MapView>
-      </SafeAreaView>
-    );
-  }
-}
 
 export default Main;

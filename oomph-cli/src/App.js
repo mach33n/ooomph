@@ -70,7 +70,7 @@ class App extends React.Component {
         this.state.locM.remove();
       }
       catch {
-        console.log('oop');  
+        console.log('A');  
       }
       this.setState({
         locM: location
@@ -93,20 +93,19 @@ class App extends React.Component {
       this.state.destM.remove();
     }
     catch {
-      console.log('oop');  
+      console.log('B');  
     }
 
     var loc = this.state.locM.getLngLat();
     var dst = dest.result.geometry.coordinates
-    console.log(this.withinBounds(gtBounds,dst))
-    console.log(this.withinBounds(gtBounds,[loc.lng,loc.lat]))
+    
     if (!this.withinBounds(gtBounds,dst) || !this.withinBounds(gtBounds,[loc.lng,loc.lat])) {
       try {
         map.removeLayer('route');
         map.removeSource('route');
       }
       catch {
-        console.log('oop');  
+        console.log('C');  
       }
       return
     }
@@ -135,7 +134,7 @@ class App extends React.Component {
       map.removeSource('route');
     }
     catch {
-      console.log('oop');  
+      console.log('D');  
     }
 
     map.addSource('route', {
@@ -168,15 +167,18 @@ class App extends React.Component {
   // This is meant to check if the user is within campus bounds and then if they are, request a driver.
   handleRideConf = () => {
     navigator.geolocation.getCurrentPosition(position => {
+      console.log('Working Geolocator')
       var loc = this.state.locM.getLngLat();
-      if (this.withinBounds(gtBounds, loc)) {
+
+      if (this.withinBounds(gtBounds, [loc.lng,loc.lat])) {
+        console.log('Hey')
         axios.post('/getDriver', {
           lat: position.coords.latitude,
           long: position.coords.longitude
         }).then(ret => {
           if (ret && ret.data != 'no') {
-           ret = JSON.parse(ret.data)
-            this.setState({driverName: ret.name, driverLicense: 'License Plate: ' + ret.licensePlate, notifDriv:true})
+            console.log(ret.data)
+            this.setState({driverName: ret.name, driverLicense: 'License Plate: ' + ret.data.licensePlate, notifDriv:true})
           } else {
            this.setState({driverName: 'No driver available', driverLicense: 'License Plate: None', notifDriv:true})
           }
@@ -186,7 +188,7 @@ class App extends React.Component {
       } else {
         this.setState({driverName: 'Too Far', driverLicense: 'Sorry you are currently too far from campus', notifDriv:true})
       }
-    })
+    }, (err) => {console.log(err)},{maximumAge:60000, timeout:5000, enableHighAccuracy:true})
   }
 
   onClose = () => {
@@ -197,11 +199,11 @@ class App extends React.Component {
     return (
       <div className="App">
         {this.state.notifDriv ? 
-          <div class="modal" id="modal">
+          <div className="modal" id="modal">
           <h2>{this.state.driverName}</h2>
-          <div class="content">{this.state.driverLicense}</div>
-            <div class="actions">
-              <button class="toggle-button" onClick={this.onClose}>
+          <div className="content">{this.state.driverLicense}</div>
+            <div className="actions">
+              <button className="toggle-button" onClick={this.onClose}>
                 close
               </button>
             </div>

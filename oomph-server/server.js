@@ -2,9 +2,9 @@ const express = require('express');
 const bodyparse = require('body-parser');
 const app = express();
 const cors = require('cors');
-const e = require('express');
 const port = 3000;
 
+var ObjectID = require('mongodb').ObjectID; 
 const client = require('mongodb').MongoClient;
 
 const server = require('http').createServer(app);
@@ -16,6 +16,7 @@ app.use(cors());
 // instantiate a connection to our new driver through application
 var wss = new WebSocketServer({httpServer: server})
 var storedSockets = {};
+var storedConnections = {};
 
 // Kinda ugly but just encompasses all mongodb client stuff
 client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/oomph?retryWrites=true&w=majority', {
@@ -23,16 +24,32 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
         // reference to collection in oomph db is drivers
         const db = client.db('oomph');
         const driversdb = db.collection('drivers');
-
+        
+        
         // Handles updating driver location and ensuring driver is in app to recieve notifs
         wss.on('request',(request) => {
             var connection = request.accept(null, request.origin);
             var name;
-            //storedSockets[connection.remoteAddress] = connection
-
+            
             // updates location of driver using websocket
             connection.on('message', (req) => {
                 var data = JSON.parse(req.utf8Data)
+                
+                if (data.type == "intro") {
+                    storedSockets[data.id] = connection
+                    storedConnections[connection] = data.id
+                    
+                    console.log(data.id)
+                    console.log(Object.keys(storedSockets))
+
+                    driversdb.updateOne({ _id: ObjectID(storedConnections[connection]) }, { $set: {
+                        "active": true
+                    }}).catch(err => {
+                        console.log(err);
+                    })
+                }
+                
+                
                 if (data.type == "locUpdate") {
                     name = data.name
                     driversdb.updateOne({ name: data.name }, { $set: {
@@ -44,8 +61,40 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                 }
             })
 
+            // Currently just setting drivers as inactive when they're not on app
+            connection.on('close', () => {
+                console.log('Connection Sever: ')
+                console.log(storedConnections[connection])
+                driversdb.updateOne({ _id: ObjectID(storedConnections[connection]) }, { $set: {
+                    "active": false
+                }}).catch(err => {
+                    console.log(err);
+                })
+            })
+        })
+        
+        
+        // Endpoint for signing up a new driver
+        app.post('/newdriver', (req, res) => {
+            driversdb.insertOne({
+                name: req.body.name,
+                licensePlate: req.body.licensePlate,
+                capacity: req.body.capacity,
+                active: true
+                }, (err, docs) => {
+                    try {
+                        storedSockets[docs.insertedId.toString()] = {}
+                        res.send({'id': docs.insertedId})
+                    } catch {
+                        console.log(err)
+                    }
+                })
+            })
+            
+
             // Endpoint for requesting nearest driver for request
             app.post('/getDriver', (req,res) => {
+                console.log('Here')
                 driversdb.createIndex({location:"2dsphere"});
                 driversdb.findOne({ active: {$eq: true}}, {
                     "location": {
@@ -56,40 +105,16 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                         }
                     }
                 }).then(item => {
-                    console.log(item)
                     if (item) {
+                        console.log(item)
                         var msg = {type:'alert'}
-                        connection.send(msg)
+                        storedSockets[item._id].send(JSON.stringify(msg))
                         res.send(JSON.stringify(item))
                     } else {
                         res.send('no')
                     }
                 })
             })
-
-            // Currently just setting drivers as inactive when they're not on app
-            connection.on('close', () => {
-                driversdb.updateOne({ name: name }, { $set: {
-                    active: false
-                }}).catch(err => {
-                    console.log(err);
-                })
-            })
-        })
-
-        // Endpoint for signing up a new driver
-        app.post('/newdriver', (req, res) => {
-            driversdb.insertOne({
-                name: req.body.name,
-                licensePlate: req.body.licensePlate,
-                capacity: req.body.capacity,
-                active: true
-              }).then(() => {
-                res.send('New Driver made');
-            }).catch(err => {
-                console.log(err)
-            })
-        })
         
         server.listen(port, () => console.log('listening on port: ' + port))
     }).catch(err => {

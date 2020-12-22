@@ -11,7 +11,7 @@ import {Alert, StyleSheet, View, Text, Slider, Button} from 'react-native';
 import 'react-native-gesture-handler';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import {TextInput} from 'react-native-gesture-handler';
+import {State, TextInput} from 'react-native-gesture-handler';
 import Main from './Main.js';
 import axios from 'axios';
 
@@ -21,29 +21,41 @@ axios.defaults.baseURL = 'http://10.0.2.2:3000';
 var Datastore = require('react-native-local-mongodb')
 db = new Datastore({ filename: 'accountStore', autoload: true });
 
+// Experimenting
+const AuthContext = React.createContext();
+
+// Using react-navigation to navigate from the little form page to the main page.
+// The overarching widget is the app which encompasses both pages.
+const Stack = createStackNavigator();
+
 function EntryPage({navigation}) {
   const [name, setName] = useState('');
   const [licensePlate, setLicensePlate] = useState('');
   const [capacity, setCapacity] = useState(1);
 
-  const onSubmit = async () => {
+  const onSubmit = () => {
     if (name != '' && licensePlate != '') {
       // Simple Async storage but with security options
-      db.insert([{ 'name': name, 'licensePlate': licensePlate, 'capacity': capacity }])
-      await axios
-        .post('/newdriver', {
-          name: name,
-          licensePlate: licensePlate,
-          capacity: capacity,
-        })
-        .then((res) => {
-          navigation.navigate('Main', {
+      db.insert([{ 'name': name, 'licensePlate': licensePlate, 'capacity': capacity }], (err, docs) => {
+        axios.post('/newdriver', {
             name: name,
+            licensePlate: licensePlate,
+            capacity: capacity,
+          })
+          .then((res) => {
+            db.update({
+              name: name,
+              licensePlate: licensePlate,
+              capacity: capacity}, { $set: {
+                "id": res.data.id
+            }}, {}, () => {
+              navigation.navigate('Main');
+            })   
+          })
+          .catch((err) => {
+            console.log(err.message);
           });
-        })
-        .catch((err) => {
-          console.log(err.message);
-        });
+      })
     } else {
       Alert.alert(
         'Please fill in both fields!',
@@ -100,26 +112,33 @@ function EntryPage({navigation}) {
   );
 }
 
-// Using react-navigation to navigate from the little form page to the main page.
-// The overarching widget is the app which encompasses both pages.
-const Stack = createStackNavigator();
-class App extends React.Component {
-  constructor(props) {
-    super(props);
-  }
 
-  render() {
-    return (
-      <NavigationContainer>
-        <Stack.Navigator>
-        <Stack.Screen name="Sign In" component={EntryPage} />
+function App() {
+  const [prev, setPrev] = React.useState(false)
+
+  React.useEffect(() => {
+    const checkAuth = async () => {
+      db.find({}, async (err, docs) => {
+        if (docs != undefined && docs.length >= 1 && !err) {
+          setPrev(true)
+        }
+      })
+    }
+    checkAuth()
+  }, [])
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        {!prev ? (<Stack.Screen name="Sign In" component={EntryPage} />) : null }
         <Stack.Screen name="Main" component={Main} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    );
-  }
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 }
 
+
+// Ugly styles but whatevs
 const styles = StyleSheet.create({
   container: {
     flex: 1,
