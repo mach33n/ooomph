@@ -25,6 +25,7 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
         const db = client.db('oomph');
         const driversdb = db.collection('drivers');
         
+        // Wuss Poppin
         
         // Handles updating driver location and ensuring driver is in app to recieve notifs
         wss.on('request',(request) => {
