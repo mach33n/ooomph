@@ -12,18 +12,18 @@ axios.defaults.baseURL = "http://localhost:3000"
 
 const directionsCli = MapboxDirectionsFactory({accessToken: 'pk.eyJ1Ijoic21hY2tjYW0iLCJhIjoiY2p3NWx0Z3ZoMXVldjQ4cXF6MWZrMGZ5NyJ9.EgCkRVGAAUDmUVYR-JSfeg'})
 
-var map = null;
-var gtBounds = [-84.419267,33.768374,-84.378433,33.785086];
+var map = null
+var gtBounds = [-84.419267,33.768374,-84.378433,33.785086]
 
 function App() {
-
   var [selected, setSelected] = useState(false)
   var [driverObj, changeDriverObj] = useState({driverName: '', driverLicense: '', notifDriv:false})
   var [locM, setLocM] = useState({})
   var [destM, setDestM] = useState({})
+  var [req, setReq] = useState({})
   
   var mapContainer = useRef(null)
-
+  
   var geocoder = new MapboxGeocoder({ // Initialize the geocoder
     accessToken: mapboxgl.accessToken, // Set the access token
     mapboxgl: mapboxgl, // Set the mapbox-gl instance
@@ -31,11 +31,8 @@ function App() {
     bbox: gtBounds,
     placeholder: 'Search places on campus'
   })
-  
-  useEffect(() => init(),[])
-  useEffect(() => onLocUpdate())
 
-  var init = () => {
+  var init = () =>{
     // initialize map
     map = new mapboxgl.Map({
       container: mapContainer,
@@ -47,59 +44,75 @@ function App() {
 
     // Add the geocoder to the map
     map.addControl(geocoder)
-    geocoder.on('result', (dest) => {
-      var loc = locM.getLngLat()
-      if (loc && withinBounds(gtBounds, [loc.lng,loc.lat])) {
-        rideReq(dest)
-      } else {
-        changeDriverObj({driverName: 'Too Far', driverLicense: 'Sorry you are currently too far from campus', notifDriv:true})
-      }
-    })
   }
+
+  // Handler for search result confirmation
+  geocoder.on('result', (dest) => {
+    setReq(dest)
+    setSelected(true)
+  })
+
+  // Just an initializer sort of like Constructor
+  useEffect(() => {
+    if (!map) {
+      init()
+    }
+  }, [])
+
+  // The only stateful way to present a route when user selects destination
+  useEffect(() => {
+    if (selected && withinBounds(gtBounds,[locM.getLngLat().lng,locM.getLngLat().lat])) {
+      rideReq(req)
+      setSelected(false)
+    }
+  })
+
+  // Refreshes user location after every frame render
+  useEffect(() => {  
+    onLocUpdate()
+  })
   
-  // This function updates the marker for the user position
-  var onLocUpdate = async () => {
+  // // This function updates the marker for the user position
+  var onLocUpdate = () => {
     navigator.geolocation.getCurrentPosition(position => {
-      // try {
-      //   var loc = locM.getLngLat()
-      //   if ([position.coords.longitude, position.coords.latitude] == [loc.lng,loc.lat]) {
-      //     return 
-      //   }
-      // }
-      // catch {
-      //   console.log('No Loc Object')
-      // }
-      var user = document.createElement('user')
-      user.className = 'user'
-      var location = new mapboxgl.Marker(user)
-      location.setLngLat([position.coords.longitude, position.coords.latitude])
-      location.addTo(map)
+      // Tried to be a little more efficient by only changing location when it actually changes
+      if (Object.keys(locM).length !== 0 && position.coords === [locM.getLngLat().lng, locM.getLngLat().lat]) {
+        return 
+      }
+
       try {
         locM.remove()
       }
       catch {
-        console.log('A');  
+        console.log('Could not remove locM. Possibly not there.');  
       }
+
+      var user = document.createElement('user')
+      user.className = 'user'
+
+      var location = new mapboxgl.Marker(user)
+      location.setLngLat([position.coords.longitude, position.coords.latitude])
+      location.addTo(map)
       setLocM(location)
-      if (selected) {
-        var coord = destM.getLngLat()
-        rideReq({result:{geometry:{coordinates:[coord.lng,coord.lat]}}})
+      // Keeps route updates to proper user location
+      if (Object.keys(req).length !==  0) {
+        setSelected(true)
       }
     })
   }
 
+  // Helper function 
   const withinBounds = (bb, coord) => {
     return bb[0] <= coord[0] && coord[0] <= bb[2] && bb[1] <= coord[1] && coord[1] <= bb[3]
   }
 
   // This function displays a given destination and its route.
   var rideReq = async (dest) => {
-    // put destination marker first
     try {
       destM.remove()
     }
     catch {
-      console.log('B')
+      console.log('Could not remove destM. Possibly not there.');  
     }
 
     var loc = locM.getLngLat()
@@ -165,7 +178,6 @@ function App() {
       'line-width': 8
       }
     })
-    setSelected(true)
   }
 
   // This is meant to check if the user is within campus bounds and then if they are, request a driver.
@@ -177,7 +189,7 @@ function App() {
           lat: position.coords.latitude,
           long: position.coords.longitude
         }).then(ret => {
-          if (ret && ret.data != 'no') {
+          if (ret && ret.data !== 'no') {
             changeDriverObj({driverName: ret.name, driverLicense: 'License Plate: ' + ret.data.licensePlate, notifDriv:true})
           } else {
             changeDriverObj({driverName: 'No driver available', driverLicense: 'License Plate: None', notifDriv:true})
@@ -207,7 +219,7 @@ function App() {
             </button>
           </div>
         </div> : null}
-      <Button id="confirm" variant="primary" size="lg" onClick={handleRideConf} disabled={!selected}>Confirm</Button>
+      <Button id="confirm" variant="primary" size="lg" onClick={handleRideConf} disabled={Object.keys(req).length === 0}>Confirm</Button>
       <div ref={el => mapContainer = el} className="mapContainer"/>
     </div>
   )
