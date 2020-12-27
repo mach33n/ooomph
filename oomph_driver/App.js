@@ -16,10 +16,13 @@ import Main from './Main.js';
 import axios from 'axios';
 
 // Android has to use this url to access localhost on machine
-axios.defaults.baseURL = 'http://10.0.2.2:3000';
+// uncomment if using ios Simulator
+axios.defaults.baseURL = 'http://localhost:3000';
+// uncomment if using android simulator
+// axios.defaults.baseURL = 'http://10.0.2.2:3000';
 
-var Datastore = require('react-native-local-mongodb')
-db = new Datastore({ filename: 'accountStore', autoload: true });
+// eslint-disable-next-line no-mixed-requires
+var Datastore = require('react-native-local-mongodb'), db = new Datastore({filename: 'accountStore', autoload: true});
 
 // Experimenting
 const AuthContext = React.createContext();
@@ -34,28 +37,40 @@ function EntryPage({navigation}) {
   const [capacity, setCapacity] = useState(1);
 
   const onSubmit = () => {
-    if (name != '' && licensePlate != '') {
+    if (name !== '' && licensePlate !== '') {
       // Simple Async storage but with security options
-      db.insert([{ 'name': name, 'licensePlate': licensePlate, 'capacity': capacity }], (err, docs) => {
-        axios.post('/newdriver', {
-            name: name,
-            licensePlate: licensePlate,
-            capacity: capacity,
-          })
-          .then((res) => {
-            db.update({
+      db.insert(
+        [{name: name, licensePlate: licensePlate, capacity: capacity}],
+        (err, docs) => {
+          axios
+            .post('/newdriver', {
               name: name,
               licensePlate: licensePlate,
-              capacity: capacity}, { $set: {
-                "id": res.data.id
-            }}, {}, () => {
-              navigation.navigate('Main');
-            })   
-          })
-          .catch((err) => {
-            console.log(err.message);
-          });
-      })
+              capacity: capacity,
+            })
+            .then((res) => {
+              db.update(
+                {
+                  name: name,
+                  licensePlate: licensePlate,
+                  capacity: capacity,
+                },
+                {
+                  $set: {
+                    id: res.data.id,
+                  },
+                },
+                {},
+                () => {
+                  navigation.navigate('Main');
+                },
+              );
+            })
+            .catch((err) => {
+              console.log(err.message);
+            });
+        },
+      );
     } else {
       Alert.alert(
         'Please fill in both fields!',
@@ -69,25 +84,25 @@ function EntryPage({navigation}) {
   return (
     <View style={styles.container} backgroundColor="green">
       <View>
-      <View style={styles.container2} backgroundColor="green">
-      <View style={styles.container2} backgroundColor="green">
-        <Text style={styles.formLabel}> Driver Form </Text>
+        <View style={styles.container2} backgroundColor="green">
           <View style={styles.container2} backgroundColor="green">
-            <TextInput
-              onChangeText={(val) => {
-                setName(val);
-              }}
-              placeholder="name"
-              style={styles.inputStyle}
-            />
-            <TextInput
-              onChangeText={(val) => setLicensePlate(val)}
-              secureTextEntry={true}
-              placeholder="license plate"
-              style={styles.inputStyle}
-            />
+            <Text style={styles.formLabel}> Driver Form </Text>
+            <View style={styles.container2} backgroundColor="green">
+              <TextInput
+                onChangeText={(val) => {
+                  setName(val);
+                }}
+                placeholder="name"
+                style={styles.inputStyle}
+              />
+              <TextInput
+                onChangeText={(val) => setLicensePlate(val)}
+                secureTextEntry={true}
+                placeholder="license plate"
+                style={styles.inputStyle}
+              />
+            </View>
           </View>
-        </View>
           <Text style={styles.formText}> Driving Capacity </Text>
           <Slider
             step={1}
@@ -112,31 +127,29 @@ function EntryPage({navigation}) {
   );
 }
 
-
 function App() {
-  const [prev, setPrev] = React.useState(false)
+  const [prev, setPrev] = React.useState(false);
 
   React.useEffect(() => {
     const checkAuth = async () => {
       db.find({}, async (err, docs) => {
         if (docs != undefined && docs.length >= 1 && !err) {
-          setPrev(true)
+          setPrev(true);
         }
-      })
-    }
-    checkAuth()
-  }, [])
+      });
+    };
+    checkAuth();
+  }, []);
 
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        {!prev ? (<Stack.Screen name="Sign In" component={EntryPage} />) : null }
+        {!prev ? <Stack.Screen name="Sign In" component={EntryPage} /> : null}
         <Stack.Screen name="Main" component={Main} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
-
 
 // Ugly styles but whatevs
 const styles = StyleSheet.create({
@@ -146,10 +159,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     height: 50,
-    paddingBottom: 20
+    paddingBottom: 20,
   },
   container2: {
-    paddingBottom:20
+    paddingBottom: 20,
   },
   formLabel: {
     fontSize: 50,

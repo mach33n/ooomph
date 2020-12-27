@@ -29,6 +29,8 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
         wss.on('request',(request) => {
             var connection = request.accept(null, request.origin);
             var name;
+
+            console.log('New Connection')
             
             // updates location of driver using websocket
             connection.on('message', (req) => {
@@ -48,8 +50,9 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                     })
                 }
                 
-                
                 if (data.type == "locUpdate") {
+                    console.log('Got Update')
+                    console.log(data)
                     name = data.name
                     driversdb.updateOne({ name: data.name }, { $set: {
                         "location": { type: "Point", coordinates: [data.long, data.lat] },
@@ -71,10 +74,21 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                 })
             })
         })
+
+        app.post('/test', (req, res) => {
+            console.log("Hello");
+            console.log(req);
+            usersdb.insertOne({
+                eduEmail: req.body.eduEmail,
+                password: req.body.password
+            })
+            res.send('POST request to homepage')
+        })
         
         
         // Endpoint for signing up a new driver
         app.post('/newdriver', (req, res) => {
+            console.log('New Driver')
             driversdb.insertOne({
                 name: req.body.name,
                 licensePlate: req.body.licensePlate,
@@ -106,7 +120,11 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                 }).then(item => {
                     if (item) {
                         console.log(item)
-                        var msg = {type:'alert'}
+                        var msg = {
+                            type:'alert',
+                            lat: req.body.lat,
+                            long: req.body.long
+                        }
                         storedSockets[item._id].send(JSON.stringify(msg))
                         res.send(JSON.stringify(item))
                     } else {

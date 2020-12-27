@@ -144,6 +144,7 @@ function App() {
       profile: 'driving',
       geometries: 'geojson'
     }
+    
     const resp = await directionsCli.getDirections(dirReq).send()
 
     try {
@@ -190,7 +191,7 @@ function App() {
           long: position.coords.longitude
         }).then(ret => {
           if (ret && ret.data !== 'no') {
-            changeDriverObj({driverName: ret.name, driverLicense: 'License Plate: ' + ret.data.licensePlate, notifDriv:true})
+            changeDriverObj({driverName: ret.data.name, driverLicense: 'License Plate: ' + ret.data.licensePlate, notifDriv:true})
           } else {
             changeDriverObj({driverName: 'No driver available', driverLicense: 'License Plate: None', notifDriv:true})
           }
