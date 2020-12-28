@@ -4,9 +4,12 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+
+import FirstPage from './FirstPage.js';
+
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <FirstPage />
   </React.StrictMode>,
   document.getElementById('root')
 );
