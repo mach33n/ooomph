@@ -23,7 +23,7 @@ var Datastore = require('react-native-local-mongodb'),
   db = new Datastore({filename: 'accountStore', autoload: true});
 
 // This is the main screen for driver map and navigation.
-function Main({navigation}) {
+function Main({navigation, route}) {
   const [rideAlert, setRideAlert] = useState(false);
   const [isGranted, setIsGranted] = useState(true);
   const [id, setId] = useState('');
@@ -44,24 +44,18 @@ function Main({navigation}) {
 
     socket.onopen = () => {
       console.log('connected to socket');
+      console.log(route.params);
       // This will send the driver ID so the server can match up
       // the driver and their websocket connection. See server.js line 37
-      db.find({}, (err, docs) => {
-        if (err) {
-          console.log(err);
-          return;
-        }
-        console.log(docs);
-        // Some bug where initial driver login crashes on first go
-        // Gonna report in trello but issue goes away if you just refresh app
-        var msg = {
-          type: 'intro',
-          id: docs[0].id,
-        };
-        setName(docs[0].name);
-        setId(docs[0].id);
-        socket.send(JSON.stringify(msg));
-      });
+      // Some bug where initial driver login crashes on first go
+      // Gonna report in trello but issue goes away if you just refresh app
+      var msg = {
+        type: 'intro',
+        id: route.params.id,
+      };
+      setName(route.params.name);
+      setId(route.params.id);
+      socket.send(JSON.stringify(msg));
     };
 
     socket.onmessage = (res) => {

@@ -22,7 +22,8 @@ axios.defaults.baseURL = 'http://localhost:3000';
 // axios.defaults.baseURL = 'http://10.0.2.2:3000';
 
 // eslint-disable-next-line no-mixed-requires
-var Datastore = require('react-native-local-mongodb'), db = new Datastore({filename: 'accountStore', autoload: true});
+var Datastore = require('react-native-local-mongodb'),
+  db = new Datastore({filename: 'accountStore', autoload: true});
 
 // Experimenting
 const AuthContext = React.createContext();
@@ -31,7 +32,7 @@ const AuthContext = React.createContext();
 // The overarching widget is the app which encompasses both pages.
 const Stack = createStackNavigator();
 
-function EntryPage({navigation}) {
+function EntryPage({navigation, route}) {
   const [name, setName] = useState('');
   const [licensePlate, setLicensePlate] = useState('');
   const [capacity, setCapacity] = useState(1);
@@ -42,6 +43,10 @@ function EntryPage({navigation}) {
       db.insert(
         [{name: name, licensePlate: licensePlate, capacity: capacity}],
         (err, docs) => {
+          if (err) {
+            console.log(err);
+            return err;
+          }
           axios
             .post('/newdriver', {
               name: name,
@@ -62,7 +67,9 @@ function EntryPage({navigation}) {
                 },
                 {},
                 () => {
-                  navigation.navigate('Main');
+                  console.log(route);
+                  route.params.checkAuth();
+                  //navigation.navigate('Main');
                 },
               );
             })
@@ -129,23 +136,37 @@ function EntryPage({navigation}) {
 
 function App() {
   const [prev, setPrev] = React.useState(false);
+  const [id, setId] = React.useState(false);
+  const [name, setName] = React.useState('');
 
+  const checkAuth = () => {
+    db.find({}, (err, docs) => {
+      if (docs !== undefined && docs.length >= 1 && !err) {
+        setId(docs[0].id);
+        setName(docs[0].name);
+        setPrev(true);
+      }
+    });
+  };
   React.useEffect(() => {
-    const checkAuth = async () => {
-      db.find({}, async (err, docs) => {
-        if (docs != undefined && docs.length >= 1 && !err) {
-          setPrev(true);
-        }
-      });
-    };
     checkAuth();
-  }, []);
+  });
 
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        {!prev ? <Stack.Screen name="Sign In" component={EntryPage} /> : null}
-        <Stack.Screen name="Main" component={Main} />
+        {!prev ? (
+          <Stack.Screen
+            name="Sign In"
+            component={EntryPage}
+            initialParams={{checkAuth: checkAuth}}
+          />
+        ) : null}
+        <Stack.Screen
+          name="Main"
+          component={Main}
+          initialParams={{id: id, name: name}}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
