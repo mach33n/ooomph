@@ -51,8 +51,6 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                 }
                 
                 if (data.type == "locUpdate") {
-                    console.log('Got Update')
-                    console.log(data)
                     name = data.name
                     driversdb.updateOne({ name: data.name }, { $set: {
                         "location": { type: "Point", coordinates: [data.long, data.lat] },
@@ -85,6 +83,18 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
             res.send('POST request to homepage')
         })
         
+        app.post('/removeDriver', (req, res) => {
+            console.log('Got request')
+            console.log(req.body)
+            try {
+                // driversdb.deleteOne({
+                //     "_id": new ObjectID(req.body.id)
+                // })
+                res.send(req.body.id)
+            } catch (e) {
+                console.log(e)
+            }
+        })
         
         // Endpoint for signing up a new driver
         app.post('/newdriver', (req, res) => {
@@ -101,6 +111,17 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                     } catch {
                         console.log(err)
                     }
+                })
+            })
+
+            app.get('/verifyDriver', (req, res) => {
+                driversdb.findOne({
+                    _id: ObjectID(req.body.id)
+                }).then((item) => {
+                    res.send(item)
+                }).catch((err) => {
+                    console.log(err)
+                    res.send(err)
                 })
             })
             
