@@ -10,6 +10,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import MapboxGL from '@react-native-mapbox-gl/maps';
+import { Popup } from 'react-native-map-link';
 
 // Initialize some Mapbox credentials
 // See https://github.com/react-native-mapbox-gl/maps
@@ -27,7 +28,10 @@ var Datastore = require('react-native-local-mongodb'),
 // This is the main screen for driver map and navigation.
 function Main({navigation, route}) {
   const [rideAlert, setRideAlert] = useState(false);
+  const [rideAcc, setRideAcc] = useState(false);
   const [isGranted, setIsGranted] = useState(true);
+  const [rideObj, setRideObj] = useState({});
+
   const [userId, setId] = useState('');
   const [name, setName] = useState('');
 
@@ -36,37 +40,45 @@ function Main({navigation, route}) {
   // Uncomment for ios
   //const socket = new WebSocket('ws://localhost:3000');
 
-  const init = async () => {
-    const isGranted = await MapboxGL.requestAndroidLocationPermissions();
-    setIsGranted(isGranted);
-
-    if (isGranted) {
-      MapboxGL.locationManager.start();
-    }
-
-    setName(route.params.name);
-    setId(route.params.userId);
-    socket.onopen = () => {
-      console.log('connected to socket');
-      console.log(route.params);
-      // This will send the driver ID so the server can match up
-      // the driver and their websocket connection. See server.js line 37
-      // Some bug where initial driver login crashes on first go
-      // Gonna report in trello but issue goes away if you just refresh app
-      var msg = {
-        type: 'intro',
-        id: route.params.userId,
-      };
-      socket.send(JSON.stringify(msg));
+  socket.onopen = () => {
+    console.log('connected to socket');
+    console.log(route.params);
+    // This will send the driver ID so the server can match up
+    // the driver and their websocket connection. See server.js line 37
+    // Some bug where initial driver login crashes on first go
+    // Gonna report in trello but issue goes away if you just refresh app
+    var msg = {
+      type: 'intro',
+      id: route.params.userId,
     };
+    socket.send(JSON.stringify(msg));
+  };
 
-    socket.onmessage = (res) => {
-      // Want to recieve a distance value to go in notification.
-      setRideAlert(true);
-    };
+  socket.onmessage = (res) => {
+    console.log(res.data);
+    console.log('Here');
+    setRideObj({
+      lat: res.data.lat,
+      lon: res.data.lon,
+      flat: res.data.flat,
+      flon: res.data.flon,
+    });
+    // Want to recieve a distance value to go in notification.
+    setRideAlert(true);
   };
 
   useEffect(() => {
+    const init = async () => {
+      const isGranted = await MapboxGL.requestAndroidLocationPermissions();
+      setIsGranted(isGranted);
+
+      if (isGranted) {
+        MapboxGL.locationManager.start();
+      }
+
+      setName(route.params.name);
+      setId(route.params.userId);
+    };
     init();
   }, []);
 
@@ -83,6 +95,25 @@ function Main({navigation, route}) {
     }
   };
 
+  var NavPopUp = () => {
+    return <Popup
+      isVisible={rideAcc}
+      onCancelPressed={() => {setRideAcc(false);}}
+      onAppPressed={() => {setRideAcc(false);}}
+      onBackButtonPressed={() => {setRideAcc(false);}}
+      modalProps={{ // you can put all react-native-modal props inside.
+          animationIn: 'slideInUp',
+      }}
+      options={{
+        latitude: rideObj.flat,
+        longitude: rideObj.flon,
+        sourceLatitude: rideObj.lat,
+        sourceLongitude: rideObj.lon,
+        alwaysIncludeGoogle: true,
+      }}
+  />;
+  };
+
   return (
     <SafeAreaView
       style={[{flex: 1}, {backgroundColor: 'blue'}]}
@@ -96,6 +127,7 @@ function Main({navigation, route}) {
           </View>
         </View>
       </Modal>
+      <NavPopUp/>
       <Modal
         animationType="slide"
         transparent={true}
@@ -117,6 +149,7 @@ function Main({navigation, route}) {
                 }}
                 onPress={() => {
                   setRideAlert(!rideAlert);
+                  setRideAcc(true);
                 }}>
                 <Text style={styles.textStyle}>Yes I do</Text>
               </TouchableHighlight>

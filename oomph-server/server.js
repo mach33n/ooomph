@@ -141,7 +141,7 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                                 }
                             })
                     }
-                    res.send(true)
+                    res.send({})
                 }).catch((err) => {
                     console.log(err)
                     res.send(err)
@@ -166,8 +166,10 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                         console.log(item)
                         var msg = {
                             type:'alert',
-                            lat: req.body.lat,
-                            long: req.body.long
+                            slat: req.body.lat,
+                            slong: req.body.long,
+                            flat: req.body.flat,
+                            flon: req.body.flon
                         }
                         storedSockets[item._id].send(JSON.stringify(msg))
                         res.send(JSON.stringify(item))
