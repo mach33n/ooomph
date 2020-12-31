@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import React, {useEffect, useState} from 'react';
 import {
   Alert,
@@ -15,7 +16,8 @@ import MapboxGL from '@react-native-mapbox-gl/maps';
 MapboxGL.setAccessToken(
   'pk.eyJ1Ijoic21hY2tjYW0iLCJhIjoiY2p3NWx0Z3ZoMXVldjQ4cXF6MWZrMGZ5NyJ9.EgCkRVGAAUDmUVYR-JSfeg',
 );
-//MapboxGL.setConnected(true);
+// Uncomment for android
+MapboxGL.setConnected(true);
 
 // Initialize an internal store for Authentication
 // See
@@ -26,22 +28,24 @@ var Datastore = require('react-native-local-mongodb'),
 function Main({navigation, route}) {
   const [rideAlert, setRideAlert] = useState(false);
   const [isGranted, setIsGranted] = useState(true);
-  const [id, setId] = useState('');
+  const [userId, setId] = useState('');
   const [name, setName] = useState('');
 
   // Uncomment for android
-  // const socket = new WebSocket('ws://10.0.2.2:3000');
+  const socket = new WebSocket('ws://10.0.2.2:3000');
   // Uncomment for ios
-  const socket = new WebSocket('ws://localhost:3000');
+  //const socket = new WebSocket('ws://localhost:3000');
 
   const init = async () => {
-    //const isGranted = await MapboxGL.requestAndroidLocationPermissions();
+    const isGranted = await MapboxGL.requestAndroidLocationPermissions();
     setIsGranted(isGranted);
 
     if (isGranted) {
       MapboxGL.locationManager.start();
     }
 
+    setName(route.params.name);
+    setId(route.params.userId);
     socket.onopen = () => {
       console.log('connected to socket');
       console.log(route.params);
@@ -51,10 +55,8 @@ function Main({navigation, route}) {
       // Gonna report in trello but issue goes away if you just refresh app
       var msg = {
         type: 'intro',
-        id: route.params.id,
+        id: route.params.userId,
       };
-      setName(route.params.name);
-      setId(route.params.id);
       socket.send(JSON.stringify(msg));
     };
 
@@ -66,12 +68,10 @@ function Main({navigation, route}) {
 
   useEffect(() => {
     init();
-    console.log(name);
   }, []);
 
   var onUpdate = (location) => {
     if (socket.readyState === WebSocket.OPEN) {
-      console.log(name);
       var msg = {
         type: 'locUpdate',
         name: name,
