@@ -65,12 +65,12 @@ function EntryPage({navigation, route}) {
                 },
                 {
                   $set: {
-                    id: res.data.id,
+                    userId: res.data.id,
                   },
                 },
                 {},
                 () => {
-                  signIn({id: res.data.id, name: name})
+                  signIn({userId: res.data.id, name: name, licensePlate: licensePlate, capacity: capacity});
                 },
               );
             })
@@ -136,32 +136,41 @@ function EntryPage({navigation, route}) {
 }
 
 function App({navigation}) {
-  // const [prev, setPrev] = React.useState(false);
-  // const [id, setId] = React.useState(false);
-  // const [name, setName] = React.useState('');
-
   const [usrObj, authDispatch] = React.useReducer(
     (prevObj, action) => {
       switch (action.type) {
         case 'RESTORE_USER':
+          axios.post('/verifyDriver', {
+              id: action.userId,
+              name: action.name,
+              licensePlate: action.licensePlate,
+              capacity: action.capacity,
+          });
           return {
             ...prevObj,
             isLoading: false,
-            userId: action.id,
+            userId: action.userId,
             name: action.name,
+            licensePlate: action.licensePlate,
+            capacity: action.capacity,
           };
         case 'SIGN_IN':
           return {
             ...prevObj,
             isSignout: false,
-            userId: action.id,
+            userId: action.userId,
             name: action.name,
+            licensePlate: action.licensePlate,
+            capacity: action.capacity,
           };
         case 'SIGN_OUT':
           return {
-            ...prevObj,
-            isSignout: true,
-            userToken: null,
+            isLoading: true,
+            isSignout: false,
+            userId: null,
+            name: null,
+            licensePlate: null,
+            capacity: null,
           };
       }
     },
@@ -169,6 +178,9 @@ function App({navigation}) {
       isLoading: true,
       isSignout: false,
       userId: null,
+      name: null,
+      licensePlate: null,
+      capacity: null,
     },
   );
 
@@ -186,9 +198,9 @@ function App({navigation}) {
             return;
           }
           if (docs !== undefined && docs.length >= 1 && !err) {
-            userId = docs[0].id;
+            userId = docs[0].userId;
             // further validate the id in the future
-            authDispatch({type: 'RESTORE_USER', id: userId});
+            authDispatch({type: 'RESTORE_USER', userId: userId, name: docs[0].name, licensePlate: docs[0].licensePlate, capacity: docs[0].capacity});
           }
           return;
         });
@@ -211,43 +223,20 @@ function App({navigation}) {
         // After getting token, we need to persist the token using `AsyncStorage`
         // In the example, we'll use a dummy token
 
-        console.log('Called HEre')
-
-        authDispatch({type: 'SIGN_IN', id: data.id, name: data.name});
+        authDispatch({type: 'SIGN_IN', userId: data.userId, name: data.name, licensePlate: data.licensePlate, capacity: data.capacity});
       },
-      signOut: () => authDispatch({type: 'SIGN_OUT'}),
-      signUp: async (data) => {
-        // In a production app, we need to send user data to server and get a token
-        // We will also need to handle errors if sign up failed
-        // After getting token, we need to persist the token using `AsyncStorage`
-        // In the example, we'll use a dummy token
-
-        authDispatch({type: 'SIGN_IN', id: data.id, name: data.name});
+      signOut: () => {
+        authDispatch({type: 'SIGN_OUT'});
       },
     }),
     [],
   );
 
-  // const checkAuth = () => {
-  //   db.find({}, (err, docs) => {
-  //     if (docs !== undefined && docs.length >= 1 && !err) {
-  //       setId(docs[0].id);
-  //       setName(docs[0].name);
-  //       setPrev(true);
-  //     }
-  //   });
-  //   //db.delete({}, (err, docs) => {})
-  // };
-
-  // React.useEffect(() => {
-  //   checkAuth();
-  // }, [id, name]);
-
   return (
     <NavigationContainer>
       <AuthContext.Provider value={authContext}>
         <Stack.Navigator>
-          {usrObj.id != null ? (
+          {usrObj.userId == null ? (
             <Stack.Screen
               name="Sign In"
               component={EntryPage}
@@ -256,16 +245,16 @@ function App({navigation}) {
             <Stack.Screen
               name="Main"
               component={Main}
-              initialParams={{id: usrObj.id, name: usrObj.name}}
+              initialParams={{userId: usrObj.userId, name: usrObj.name}}
               options={({navigation, route}) => ({
                 // Creates a "Logout" button that actually deletes user from db
                 headerRight: () => (
                   <Button
-                    disabled={!(usrObj.id == null)}
+                    disabled={usrObj.userId == null}
                     onPress={() => {
                       axios
                         .post('/removeDriver', {
-                          id: usrObj.id,
+                          id: usrObj.userId,
                         })
                         .then(() => {
                           // Removes all stored information on driver device
@@ -278,7 +267,7 @@ function App({navigation}) {
                             console.log('^^ number of drivers removed');
                           });
                         });
-                      navigation.popToTop();
+                      authContext.signOut();
                     }}
                     title="Logout"
                     color="#0080ff"

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import React, {useEffect, useState} from 'react';
 import {
   Alert,
@@ -27,7 +28,7 @@ var Datastore = require('react-native-local-mongodb'),
 function Main({navigation, route}) {
   const [rideAlert, setRideAlert] = useState(false);
   const [isGranted, setIsGranted] = useState(true);
-  const [id, setId] = useState('');
+  const [userId, setId] = useState('');
   const [name, setName] = useState('');
 
   // Uncomment for android
@@ -44,7 +45,7 @@ function Main({navigation, route}) {
     }
 
     setName(route.params.name);
-    setId(route.params.id);
+    setId(route.params.userId);
     socket.onopen = () => {
       console.log('connected to socket');
       console.log(route.params);
@@ -54,11 +55,11 @@ function Main({navigation, route}) {
       // Gonna report in trello but issue goes away if you just refresh app
       var msg = {
         type: 'intro',
-        id: route.params.id,
+        id: route.params.userId,
       };
       socket.send(JSON.stringify(msg));
     };
-    
+
     socket.onmessage = (res) => {
       // Want to recieve a distance value to go in notification.
       setRideAlert(true);
