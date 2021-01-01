@@ -1,6 +1,9 @@
 import React, {useState} from "react";
+import { Link, BrowserRouter as Router } from 'react-router-dom';
 import loginImg from "../../carsex.png";
 import axios from 'axios';
+import history from "../../utils/history.js";
+import App from '../../App.js';
 
 export function Register() {
   const [eduEmail, setEduEmail] = useState('');
@@ -28,7 +31,8 @@ const handlePasswordChange = ({ target }) => {
   }
 }
 
-const onSubmit = () => {
+function onSubmit() {
+
   axios.post('/newuser', {
     eduEmail: eduEmail,
     password: password
@@ -40,9 +44,12 @@ const onSubmit = () => {
     console.log(error);
   });
   console.log("sent axios post");
-};
+  history.push("/map");
+}
+
 // ref={this.props.containerRef} --> Goes in base Container before switch to functional componentss
     return (
+
       <div className="base-container" >
         <div className="header">Register with OOMPH!</div>
         <div className="content">
@@ -61,10 +68,13 @@ const onSubmit = () => {
           </div>
         </div>
         <div className="footer">
-          <button type="button" className="btn" onClick={onSubmit}>
-            Register
-          </button>
+        <Link to="/" className="btn" onClick={onSubmit}>
+              Register
+            </Link>
         </div>
       </div>
+
     );
 }
+
+// <Link to="/"><button type="button" className="btn" onClick={onSubmit}>
