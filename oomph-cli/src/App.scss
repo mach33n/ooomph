@@ -42,12 +42,13 @@
 
 //Login Main Container
 .login {
-  width: 20em;
-  height: 31.5em;
+  width: 27em;
+  height: 40em;
+  //min-height: 44em;
   display: flex;
+  justify-content: center;
   align-items: center;
-  margin-top: 280px;
-  margin-right: auto;
+  margin-top: 5px;
   position: relative;
   z-index: 99;
   .container {

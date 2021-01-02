@@ -1,12 +1,10 @@
 import React, {useState} from "react";
-import { useHistory } from 'react-router-dom';
 import loginImg from "../../cars_sex.jpg";
 import axios from 'axios';
-import history from "../../utils/history.js"
-
-
 
 axios.defaults.baseURL = "http://localhost:3000"
+
+
 
 
 export function Login() {
@@ -49,7 +47,6 @@ export function Login() {
     .catch(function (error) {
       console.log(error);
     });
-
     console.log("sent axios post");
   };
 
@@ -81,5 +78,3 @@ export function Login() {
       </div>
     );
     }
-
-    export default Login

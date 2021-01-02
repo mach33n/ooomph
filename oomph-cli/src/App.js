@@ -6,7 +6,6 @@ import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import Button from 'react-bootstrap/Button';
 import axios from 'axios';
 import MapboxDirectionsFactory from '@mapbox/mapbox-sdk/services/directions';
-import Routes from "./routes.js";
 
 mapboxgl.accessToken = 'pk.eyJ1Ijoic21hY2tjYW0iLCJhIjoiY2p3NWx0Z3ZoMXVldjQ4cXF6MWZrMGZ5NyJ9.EgCkRVGAAUDmUVYR-JSfeg';
 axios.defaults.baseURL = "http://localhost:3000"
@@ -196,9 +195,6 @@ function App() {
   var onClose = () => {
     changeDriverObj({notifDriv:false, driverName:'', driverLicense:''})
   }
-
-  var onSubmit
-
   
   return (
     <div className="App">
@@ -213,7 +209,6 @@ function App() {
           </div>
         </div> : null}
       <Button id="confirm" variant="primary" size="lg" onClick={handleRideConf} disabled={!selected}>Confirm</Button>
-      <button type="button" className="btn" onClick={onSubmit}></button>
       <div ref={el => mapContainer = el} className="mapContainer"/>
     </div>
   )
