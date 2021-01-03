@@ -2,10 +2,13 @@
 @import url("https://fonts.googleapis.com/css?family=Open+Sans&display=swap");
 
 .App {
-  background-color: #c0c0c0;
+  background-image: url(ppp.png);
+  background-position-x: 5.5cm;
+  background-repeat: no-repeat;
   text-align: center;
   display: flex;
   justify-content: center;
+  margin-top: 65px;
   align-items: center;
   font-family: "Open Sans", sans-serif;
 }
@@ -71,7 +74,7 @@
     flex-direction: column;
     justify-content: center;
     height: 90%;
-    background-color: #228b22;
+    background-color: #dc3814;
     width: 100%;
     position: absolute;
     right: -34%;
@@ -111,7 +114,7 @@
   font-size: 21px;
   padding: 5px 20px;
   border: 0;
-  background-color: #228b22;
+  background-color: #dc3814;
   color: #fff;
   border-radius: 3px;
   transition: all 250ms ease-in-out;

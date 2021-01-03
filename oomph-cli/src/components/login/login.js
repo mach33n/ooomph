@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import loginImg from "../../cars_sex.jpg";
+import loginImg from "/Users/samkofi/Desktop/ooomph/oomph-cli/src/ooompic.png";
 import axios from 'axios';
 
 axios.defaults.baseURL = "http://localhost:3000"
@@ -10,17 +10,31 @@ axios.defaults.baseURL = "http://localhost:3000"
 export function Login() {
   const [eduEmail, setEduEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [hrefLoc, setHrefLoc] = useState('');
+  let inSystem = false;
 
   const handleEmailChange = ({ target }) => {
-      const newEduEmail = target.value;
-      //verify valid email (COME BACK)
-      const isValidEmail = true;
-      if (isValidEmail) {
-          setEduEmail(newEduEmail);
-      } else {
-          alert("Student email or password is incorrect.");
-      }
+    if (eduEmail.includes("@gatech.edu")) {
+      inSystem = true;
+    }
   }
+
+//   const updateHrefLoc = ({ target }) => {
+//     const newHrefLoc = target.value;
+//     setHrefLoc(newHrefLoc);
+// }
+
+  const updateEduEmail = ({ target }) => {
+      const newEduEmail = target.value;
+      handleEmailChange(newEduEmail)
+      setEduEmail(newEduEmail);
+  }
+
+  const updatePassword = ({ target }) => {
+    const newPassword = target.value;
+    setPassword(newPassword);
+  }
+
 
   const handlePasswordChange = ({ target }) => {
     const newPassword = target.value;
@@ -33,9 +47,15 @@ export function Login() {
     }
   }
 
+  // const onLoginClick = () => {
+  //   if (inSystem) {
+  //     updateHrefLoc('/');
+  //   } else {
+  //     updateHrefLoc('');
+  //     alert("Nah");
+  //   }
+  // }
 
-
-        
   const onSubmit = () => {
     axios.post('/getuser', {
       eduEmail: eduEmail,
@@ -62,18 +82,16 @@ export function Login() {
           <div className="form">
             <div className="form-group">
               <label htmlFor="username">Student Email</label>
-              <input type="text" name="Student Email" placeholder="Student email" onChange={handleEmailChange} />
+              <input value={eduEmail} type="text" name="Student Email" placeholder="Student email" onChange={updateEduEmail} />
             </div>
             <div className="form-group">
               <label htmlFor="password">Password</label>
-              <input type="password" name="Password" placeholder="Password" onChange={handlePasswordChange} />
+              <input type="password" name="Password" placeholder="Password" onChange={updatePassword} />
             </div>
           </div>
         </div>
         <div className="footer">
-          <button type="button" className="btn" onClick={onSubmit}>
-            Login
-          </button>
+          <a /*onClick={onLoginClick}*/ href='/'>Log in</a>
         </div>
       </div>
     );

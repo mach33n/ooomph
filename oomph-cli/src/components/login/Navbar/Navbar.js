@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { MenuItems } from "./MenuItems"
 import { Button } from "../Button"
 import './Navbar.css'
+import FirstPage from "/Users/samkofi/Desktop/ooomph/oomph-cli/src/FirstPage.js";
 
 import {
     BrowserRouter as Router,
@@ -16,10 +17,8 @@ export class Navbar extends Component {
     handleClick = () => {
         this.setState({ clicked: !this.state.clicked })
     }
-
     render() {
         return(
-            <Router>
             <nav className="NavbarItems">
                 <h1 className="navbar-logo">OOMPH<i className="fab fa-react"></i></h1>
                 <div className="menu-icon" onClick={this.handleClick}>
@@ -37,10 +36,9 @@ export class Navbar extends Component {
                     })}
                 </ul>
                 <ul className={this.state.clicked ? 'nav-menu active' : 'nav-menu2'}>
-                    <a className="nav-links" href="/#">Log in</a>
+                    <a className="nav-links" href="/FirstPage">Log in</a>
                 </ul>
             </nav>
-            </Router>
         )
     }
 }

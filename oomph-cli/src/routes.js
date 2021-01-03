@@ -7,14 +7,12 @@ import { Navbar } from "/Users/samkofi/Desktop/ooomph/oomph-cli/src/components/l
 const Routes = () => {
   return ( 
   <div>
-      <Route exact path="/#" component={FirstPage} />
       <Route exact path="/" component={Navbar} />
       <Route exact path="/" component={App} />
+      <Route exact path="/FirstPage" component={FirstPage} />
   </div>
   )
 };
 
-
-//<Route component={FirstPage} />
 
 export default Routes

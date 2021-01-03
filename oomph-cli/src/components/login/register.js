@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import loginImg from "../../carsex.png";
+import loginImg from "/Users/samkofi/Desktop/ooomph/oomph-cli/src/ooompic.png";
 import axios from 'axios';
 
 export function Register() {
@@ -61,9 +61,7 @@ const onSubmit = () => {
           </div>
         </div>
         <div className="footer">
-          <button type="button" className="btn" onClick={onSubmit}>
-            Register
-          </button>
+        <a onClick={onSubmit} href="/">Register</a>
         </div>
       </div>
     );
