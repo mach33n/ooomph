@@ -14,6 +14,10 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "nodemon": "^2.0.6",
+<<<<<<< Updated upstream
+=======
+    "stripe": "^8.129.0",
+>>>>>>> Stashed changes
     "websocket": "^1.0.32",
     "ws": "^7.4.1"
   },
