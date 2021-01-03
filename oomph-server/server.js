@@ -51,8 +51,6 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                 }
                 
                 if (data.type == "locUpdate") {
-                    console.log('Got Update')
-                    console.log(data)
                     name = data.name
                     driversdb.updateOne({ name: data.name }, { $set: {
                         "location": { type: "Point", coordinates: [data.long, data.lat] },
@@ -119,12 +117,15 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                     }
                 }).then(item => {
                     if (item) {
-                        console.log(item)
                         var msg = {
                             type:'alert',
                             lat: req.body.lat,
-                            long: req.body.long
+                            long: req.body.long,
+                            flat: req.body.flat,
+                            flon: req.body.flon,
                         }
+                        console.log('ride request')
+                        console.log(msg)
                         storedSockets[item._id].send(JSON.stringify(msg))
                         res.send(JSON.stringify(item))
                     } else {
