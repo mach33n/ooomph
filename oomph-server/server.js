@@ -47,6 +47,8 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                         "active": true
                     }}).catch(err => {
                         console.log(err);
+                        // User must not be a driver in database or something.
+                        connection.close();
                     })
                 }
                 
@@ -64,7 +66,8 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
             // Currently just setting drivers as inactive when they're not on app
             connection.on('close', () => {
                 console.log('Connection Sever: ')
-                console.log(storedConnections[connection])
+                console.log(storedConnections)
+                //storedConnections[connection].close();
                 driversdb.updateOne({ _id: ObjectID(storedConnections[connection]) }, { $set: {
                     "active": false
                 }}).catch(err => {
@@ -83,6 +86,18 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
             res.send('POST request to homepage')
         })
         
+        app.post('/removeDriver', (req, res) => {
+            console.log('Got request')
+            console.log(req.body)
+            try {
+                driversdb.deleteOne({
+                    "_id": new ObjectID(req.body.id)
+                })
+                res.send(req.body.id)
+            } catch (e) {
+                console.log(e)
+            }
+        })
         
         // Endpoint for signing up a new driver
         app.post('/newdriver', (req, res) => {
@@ -99,6 +114,37 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                     } catch {
                         console.log(err)
                     }
+                })
+            })
+
+            app.post('/verifyDriver', async (req, res) => {
+                console.log('HERE AT ALL');
+                console.log(req.body.id);
+                driversdb.findOne({
+                    _id: ObjectID(req.body.id)
+                }).then((item) => {
+                    console.log('Here')
+                    console.log(item)
+                    if (!item) {
+                        driversdb.insertOne({
+                            _id: ObjectID(req.body.id),
+                            name: req.body.name,
+                            licensePlate: req.body.licensePlate,
+                            capacity: req.body.capacity,
+                            active: true
+                            }, (err, docs) => {
+                                try {
+                                    storedSockets[docs.insertedId.toString()] = {}
+                                    res.send({'id': docs.insertedId})
+                                } catch {
+                                    console.log(err)
+                                }
+                            })
+                    }
+                    res.send({})
+                }).catch((err) => {
+                    console.log(err)
+                    res.send(err)
                 })
             })
             

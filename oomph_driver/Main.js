@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import React, {useEffect, useState} from 'react';
 import {
   Alert,
@@ -16,6 +17,7 @@ import { Popup } from 'react-native-map-link';
 MapboxGL.setAccessToken(
   'pk.eyJ1Ijoic21hY2tjYW0iLCJhIjoiY2p3NWx0Z3ZoMXVldjQ4cXF6MWZrMGZ5NyJ9.EgCkRVGAAUDmUVYR-JSfeg',
 );
+// Uncomment for android
 //MapboxGL.setConnected(true);
 
 // Initialize an internal store for Authentication
@@ -26,49 +28,50 @@ var Datastore = require('react-native-local-mongodb'),
 // This is the main screen for driver map and navigation.
 function Main({navigation, route}) {
   const [rideAlert, setRideAlert] = useState(false);
+  const [rideAcc, setRideAcc] = useState(false);
   const [isGranted, setIsGranted] = useState(true);
-  const [id, setId] = useState('');
+  const [rideObj, setRideObj] = useState({});
+  const [userId, setId] = useState('');
   const [name, setName] = useState('');
   const [isVisible, setIsVisible] = useState(false);
-  const [rideObj, setRideObj] = useState({});
 
   // Uncomment for android
-  // const socket = new WebSocket('ws://10.0.2.2:3000');
+  //const socket = new WebSocket('ws://10.0.2.2:3000');
   // Uncomment for ios
   const socket = new WebSocket('ws://localhost:3000');
 
-  const init = async () => {
-    //const isGranted = await MapboxGL.requestAndroidLocationPermissions();
-    setIsGranted(isGranted);
-
-    if (isGranted) {
-      MapboxGL.locationManager.start();
-    }
-
-    socket.onopen = () => {
-      console.log('connected to socket');
-      console.log(route.params);
-      // This will send the driver ID so the server can match up
-      // the driver and their websocket connection. See server.js line 37
-      // Some bug where initial driver login crashes on first go
-      // Gonna report in trello but issue goes away if you just refresh app
-      var msg = {
-        type: 'intro',
-        id: route.params.id,
-      };
-      setName(route.params.name);
-      setId(route.params.id);
-      socket.send(JSON.stringify(msg));
+  socket.onopen = () => {
+    console.log('connected to socket');
+    console.log(route.params);
+    // This will send the driver ID so the server can match up
+    // the driver and their websocket connection. See server.js line 37
+    // Some bug where initial driver login crashes on first go
+    // Gonna report in trello but issue goes away if you just refresh app
+    var msg = {
+      type: 'intro',
+      id: route.params.userId,
     };
+    socket.send(JSON.stringify(msg));
+  };
 
     socket.onmessage = (res) => {
       setRideObj(JSON.parse(res.data))
       // Want to recieve a distance value to go in notification.
       setRideAlert(true);
     };
-  };
 
   useEffect(() => {
+    const init = async () => {
+      const isGranted = await MapboxGL.requestAndroidLocationPermissions();
+      setIsGranted(isGranted);
+
+      if (isGranted) {
+        MapboxGL.locationManager.start();
+      }
+
+      setName(route.params.name);
+      setId(route.params.userId);
+    };
     init();
   }, []);
 
