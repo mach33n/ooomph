@@ -28,7 +28,6 @@ var Datastore = require('react-native-local-mongodb'),
 // This is the main screen for driver map and navigation.
 function Main({navigation, route}) {
   const [rideAlert, setRideAlert] = useState(false);
-  const [rideAcc, setRideAcc] = useState(false);
   const [isGranted, setIsGranted] = useState(true);
   const [rideObj, setRideObj] = useState({});
   const [userId, setId] = useState('');
@@ -62,7 +61,7 @@ function Main({navigation, route}) {
 
   useEffect(() => {
     const init = async () => {
-      const isGranted = await MapboxGL.requestAndroidLocationPermissions();
+      //const isGranted = await MapboxGL.requestAndroidLocationPermissions();
       setIsGranted(isGranted);
 
       if (isGranted) {
@@ -76,15 +75,28 @@ function Main({navigation, route}) {
   }, []);
 
   var onUpdate = (location) => {
+    console.log('Update')
     if (socket.readyState === WebSocket.OPEN) {
-      var msg = {
-        type: 'locUpdate',
-        name: name,
-        lat: location.coords.latitude,
-        long: location.coords.longitude,
-        active: true,
-      };
+      try {
+        var msg = {
+          type: 'locUpdate',
+          name: name,
+          lat: location["coords"].latitude,
+          long: location["coords"].longitude,
+          active: true,
+        };
+      }
+      catch {
+        var msg = {
+          type: 'locUpdate',
+          name: name,
+          lat: 0,
+          long: 0,
+          active: true,
+        };
+      }
       socket.send(JSON.stringify(msg));
+      console.log('Complete')
     }
   };
 
