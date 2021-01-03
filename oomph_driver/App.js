@@ -18,9 +18,9 @@ import axios from 'axios';
 
 // Android has to use this url to access localhost on machine
 // uncomment if using ios Simulator
-//axios.defaults.baseURL = 'http://localhost:3000';
+axios.defaults.baseURL = 'http://localhost:3000';
 // uncomment if using android simulator
-axios.defaults.baseURL = 'http://10.0.2.2:3000';
+//axios.defaults.baseURL = 'http://10.0.2.2:3000';
 
 // eslint-disable-next-line no-mixed-requires
 var Datastore = require('react-native-local-mongodb'),
@@ -49,6 +49,7 @@ function EntryPage({navigation, route}) {
             console.log(err);
             return err;
           }
+          console.log('BLAHHH')
           axios
             .post('/newdriver', {
               name: name,
@@ -56,6 +57,7 @@ function EntryPage({navigation, route}) {
               capacity: capacity,
             })
             .then((res) => {
+              console.log('Here')
               console.log(res.data.id);
               db.update(
                 {

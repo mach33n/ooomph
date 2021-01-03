@@ -140,7 +140,7 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                                 }
                             })
                     }
-                    res.send(true)
+                    res.send({})
                 }).catch((err) => {
                     console.log(err)
                     res.send(err)
@@ -162,12 +162,15 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                     }
                 }).then(item => {
                     if (item) {
-                        console.log(item)
                         var msg = {
                             type:'alert',
                             lat: req.body.lat,
-                            long: req.body.long
+                            long: req.body.long,
+                            flat: req.body.flat,
+                            flon: req.body.flon,
                         }
+                        console.log('ride request')
+                        console.log(msg)
                         storedSockets[item._id].send(JSON.stringify(msg))
                         res.send(JSON.stringify(item))
                     } else {
