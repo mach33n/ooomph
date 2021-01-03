@@ -87,7 +87,6 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
             res.send('POST request to homepage')
         })
         
-<<<<<<< HEAD
             // Endpoint for signing up a new user
         app.post('/newuser', (req, res) => {
              usersdb.insertOne({
@@ -117,7 +116,6 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                     }
                 })
             })    
-=======
         app.post('/removeDriver', (req, res) => {
             console.log('Got request')
             console.log(req.body)
@@ -130,7 +128,6 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
                 console.log(e)
             }
         })
->>>>>>> 63a809f1e7882fa8921bbbf96de7304c686f0763
         
         // Endpoint for signing up a new driver
         app.post('/newdriver', (req, res) => {
