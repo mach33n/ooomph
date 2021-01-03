@@ -183,25 +183,26 @@ function App() {
 
   // This is meant to check if the user is within campus bounds and then if they are, request a driver.
   var handleRideConf = () => {
-    navigator.geolocation.getCurrentPosition(position => {
-      var loc = locM.getLngLat()
-      if (withinBounds(gtBounds, [loc.lng,loc.lat])) {
-        axios.post('/getDriver', {
-          lat: position.coords.latitude,
-          long: position.coords.longitude
-        }).then(ret => {
-          if (ret && ret.data !== 'no') {
-            changeDriverObj({driverName: ret.data.name, driverLicense: 'License Plate: ' + ret.data.licensePlate, notifDriv:true})
-          } else {
-            changeDriverObj({driverName: 'No driver available', driverLicense: 'License Plate: None', notifDriv:true})
-          }
-        }).catch(err => {
-          console.log(err)
-        })
-      } else {
-        changeDriverObj({driverName: 'Too Far', driverLicense: 'Sorry you are currently too far from campus', notifDriv:true})
-      }
-    }, (err) => {console.log(err)}, {maximumAge:60000, timeout:5000, enableHighAccuracy:true})
+    var loc = locM.getLngLat()
+    var dest = destM.getLngLat()
+    if (withinBounds(gtBounds, [loc.lng,loc.lat])) {
+      axios.post('/getDriver', {
+        lat: loc.lat,
+        long: loc.lng,
+        flat: dest.lat,
+        flon: dest.lng,
+      }).then(ret => {
+        if (ret && ret.data !== 'no') {
+          changeDriverObj({driverName: ret.data.name, driverLicense: 'License Plate: ' + ret.data.licensePlate, notifDriv:true})
+        } else {
+          changeDriverObj({driverName: 'No driver available', driverLicense: 'License Plate: None', notifDriv:true})
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    } else {
+      changeDriverObj({driverName: 'Too Far', driverLicense: 'Sorry you are currently too far from campus', notifDriv:true})
+    }
   }
 
   var onClose = () => {
