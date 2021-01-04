@@ -184,29 +184,27 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
         console.log(err);
     })
 // This is a sample test API key. Sign in to see examples pre-filled with your key.
-const stripe = require("stripe")("sk_test_4eC39HqLyjWDarjtT1zdp7dc");
+const stripe = require("stripe")("sk_test_51I1mxPFIfZqwb5IQzX5I3x38VtzfB8sFIo8atMOT8DTZ1mFAxz1wl1W5vHta2YzswP5wR5Gut7Jtwjp21LjuJFGY00kH3c5jCW");
 
 app.use(express.static("."));
 app.use(express.json());
 
-const calculateOrderAmount = items => {
-  // Replace this constant with a calculation of the order's amount
-  // Calculate the order total on the server to prevent
-  // people from directly manipulating the amount on the client
-  return 1400;
-};
+const calculateRideAmount = ride => {
+    //replace this const value with pricing function 
+    return 5;
+}
 
 app.post("/create-payment-intent", async (req, res) => {
-  const { items } = req.body;
-  // Create a PaymentIntent with the order amount and currency
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: calculateOrderAmount(items),
-    currency: "usd"
-  });
+    const {ride} = req_body; 
+    // Create a PaymentIntent with the order amount and currency
+    const paymentIntent = await stripe.paymentIntents.create({
+        amount: calculateRideAmount(ride),
+        currency: "usd",
+    });
 
-  res.send({
-    clientSecret: paymentIntent.client_secret
-  });
+    res.send({
+        clientSecret: paymentIntent.client_secret
+    });
 });
 
 app.listen(4242, () => console.log('Node server listening on port 4242!'));

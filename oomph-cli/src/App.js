@@ -6,13 +6,17 @@ import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import Button from 'react-bootstrap/Button';
 import axios from 'axios';
 import MapboxDirectionsFactory from '@mapbox/mapbox-sdk/services/directions';
-import StripeCheckout from "stripe"; 
+import {loadStripe} from "@stripe/stripe-js";
+import {Elements} from "@stripe/react-stripe-js";
+import CheckoutForm from "./CheckoutForm";
+import "./global.css";
+
 
 mapboxgl.accessToken = 'pk.eyJ1Ijoic21hY2tjYW0iLCJhIjoiY2p3NWx0Z3ZoMXVldjQ4cXF6MWZrMGZ5NyJ9.EgCkRVGAAUDmUVYR-JSfeg';
 axios.defaults.baseURL = "http://localhost:3000"
 
 const directionsCli = MapboxDirectionsFactory({accessToken: 'pk.eyJ1Ijoic21hY2tjYW0iLCJhIjoiY2p3NWx0Z3ZoMXVldjQ4cXF6MWZrMGZ5NyJ9.EgCkRVGAAUDmUVYR-JSfeg'})
-const stripe = require("stripe")("sk_test_51I1mxPFIfZqwb5IQzX5I3x38VtzfB8sFIo8atMOT8DTZ1mFAxz1wl1W5vHta2YzswP5wR5Gut7Jtwjp21LjuJFGY00kH3c5jCW");
+const promise = loadStripe("pk_test_51I1mxPFIfZqwb5IQ1zKKUk1xgjrsHoea9IqPF9FgV8zpHv4TnY6n8Ja4d8etExvAdu9PV76PRJhlOegWsxSJVJCL00OIi0pL14");
 
 var map = null
 var gtBounds = [-84.419267,33.768374,-84.378433,33.785086]
@@ -211,25 +215,10 @@ function App() {
     changeDriverObj({notifDriv:false, driverName:'', driverLicense:''})
   }
 
-  var handlePayment = () => {  
-    const onToken = (token) => {
-      console.log(token); 
-    }
-  }  
-
-  const price = "5 bones";
-  
   return (
     <div className="App">
       {driverObj.notifDriv ? 
         <div className="modal" id="modal">
-          <StripeCheckout 
-            token={this.token}
-            name = "Complete Ride Payment"
-            currency = "Usd"
-            amount = {price} 
-            stipeKey = "sk_test_51I1mxPFIfZqwb5IQzX5I3x38VtzfB8sFIo8atMOT8DTZ1mFAxz1wl1W5vHta2YzswP5wR5Gut7Jtwjp21LjuJFGY00kH3c5jCW" 
-          />
         <h2>{driverObj.driverName}</h2>
         <div className="content">{driverObj.driverLicense}</div>
           <div className="actions">
@@ -237,8 +226,12 @@ function App() {
               close
             </button>
           </div>
-        </div> : null}
-      <Button id="confirm" variant="primary" size="lg" onClick={handlePayment, handleRideConf} disabled={!selected}>Confirm</Button>
+        </div> : null}   
+      <Button id="confirm" variant="primary" size="lg" onClick={handleRideConf} disabled={!selected}>
+      <Elements stripe={promise}>
+        <CheckoutForm />
+      </Elements>
+        Confirm</Button>
       <div ref={el => mapContainer = el} className="mapContainer"/>
     </div>
   )
