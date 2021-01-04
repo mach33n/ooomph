@@ -17,6 +17,7 @@
     "@react-navigation/stack": "^5.12.3",
     "axios": "^0.21.0",
     "cors": "^2.8.5",
+    "nodemon": "^2.0.6",
     "react": "^16.13.1",
     "react-bootstrap": "^1.4.0",
     "react-devtools": "^4.9.0",

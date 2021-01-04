@@ -23,6 +23,7 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
         // reference to collection in oomph db is drivers
         const db = client.db('oomph');
         const driversdb = db.collection('drivers');
+        const usersdb = db.collection('users');
         
         // Handles updating driver location and ensuring driver is in app to recieve notifs
         wss.on('request',(request) => {
@@ -85,6 +86,35 @@ client.connect('mongodb+srv://oomph:oomph@oomph-test-cluster.qytdu.mongodb.net/o
             res.send('POST request to homepage')
         })
         
+            // Endpoint for signing up a new user
+        app.post('/newuser', (req, res) => {
+             usersdb.insertOne({
+                eduEmail: req.body.eduEmail,
+                password: req.body.password
+                }, (err, docs) => {
+                    try {
+                        console.log(res);
+                    } catch {
+                        console.log(err);
+                    }
+                })
+            })
+
+        app.post('/getuser', (req, res) => {
+            var verified = usersdb.findOne({eduEmail: req.body.eduEmail,
+            password: req.body.password}, (err, docs) => {
+                    try {
+                        if (verified) {
+                            console.log('User is verified');
+                        } else {
+                            console.log('User is not verified');
+                        }
+
+                    } catch {
+                        console.log(err);
+                    }
+                })
+            })    
         app.post('/removeDriver', (req, res) => {
             console.log('Got request')
             console.log(req.body)

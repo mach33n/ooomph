@@ -21,6 +21,7 @@ const promise = loadStripe("pk_test_51I1mxPFIfZqwb5IQ1zKKUk1xgjrsHoea9IqPF9FgV8z
 var map = null
 var gtBounds = [-84.419267,33.768374,-84.378433,33.785086]
 
+
 function App() {
   var [selected, setSelected] = useState(false)
   var [driverObj, changeDriverObj] = useState({driverName: '', driverLicense: '', notifDriv:false})
