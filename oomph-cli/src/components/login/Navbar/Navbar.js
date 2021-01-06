@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { MenuItems } from "./MenuItems"
 import { Button } from "../Button"
 import './Navbar.css'
-import FirstPage from "/Users/samkofi/Desktop/ooomph/oomph-cli/src/FirstPage.js";
+import FirstPage from "../../../FirstPage.js";
 
 import {
     BrowserRouter as Router,

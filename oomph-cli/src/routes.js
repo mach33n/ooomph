@@ -2,7 +2,7 @@ import React from "react"
 import { Route, Switch } from "react-router-dom"
 import FirstPage from "./FirstPage.js";
 import App from "./App.js";
-import { Navbar } from "/Users/samkofi/Desktop/ooomph/oomph-cli/src/components/login/Navbar/Navbar.js";
+import { Navbar } from "./components/login/Navbar/Navbar.js";
 
 const Routes = () => {
   return ( 
