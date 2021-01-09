@@ -22,7 +22,7 @@ export default function CheckoutForm() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({items: [{ id: "xl-tshirt" }]})
+        body: JSON.stringify({items: [{ id: "standard-oomph-ride" }]})
       })
       .then(res => {
         return res.json();
@@ -80,6 +80,7 @@ export default function CheckoutForm() {
   return (
     <form id="payment-form" onSubmit={handleSubmit}>
       <CardElement id="card-element" options={cardStyle} onChange={handleChange} />
+      
       <button
         disabled={processing || disabled || succeeded}
         id="submit"
