@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import loginImg from "/Users/samkofi/Desktop/ooomph/oomph-cli/src/oomph2.png";
+import loginImg from "../../oomph2.png";
 import axios from 'axios';
 
 export function Register() {

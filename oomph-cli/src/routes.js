@@ -9,6 +9,7 @@ import Safety from "./components/pages/Safety.js";
 import Drive from "./components/pages/Drive.js";
 import AboutUs from "./components/pages/AboutUs.js";
 import WebNavbar from "./components/WebNavbar.js";
+import { Navbar } from "./components/login/Navbar/Navbar.js";
 
 const Routes = () => {
   return ( 
