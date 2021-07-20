@@ -22,7 +22,7 @@
     "react-bootstrap": "^1.4.0",
     "react-devtools": "^4.9.0",
     "react-dom": "^17.0.1",
-    "react-native": "0.63.3",
+    "react-native": "0.64.1",
     "react-native-gesture-handler": "^1.8.0",
     "react-native-local-mongodb": "^2.2.9",
     "react-native-map-link": "^2.7.20",
